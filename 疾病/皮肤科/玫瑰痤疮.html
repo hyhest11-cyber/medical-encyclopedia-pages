@@ -1,0 +1,452 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>玫瑰痤疮 - 健康百科</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --accent: #26A69A;
+  --accent-light: #E0F7F5;
+  --header-bg: linear-gradient(160deg, #E0F7F5 0%, #F0FFFE 60%, #ffffff 100%);
+  --text: #1a1a1a;
+  --text-sub: #999;
+  --text-body: #333;
+  --border: #efefef;
+  --header-h: 148px;
+  --tab-h: 44px;
+  }
+
+html, body {
+  height: 100%; overflow: hidden; background: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+.page-wrap { max-width: 480px; margin: 0 auto; height: 100vh; position: relative; overflow: hidden; background: #fff; }
+
+/* ── Header ── */
+.header {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: var(--header-h);
+  background: var(--header-bg);
+  z-index: 100;
+  padding: 0 16px 18px;
+  display: flex; flex-direction: column; justify-content: flex-end;
+}
+.header-nav {
+  position: absolute; top: 14px; left: 16px; right: 16px;
+  display: flex; justify-content: center; align-items: center;
+}
+.header-brand-center {
+  flex: 1; text-align: center;
+  font-size: 13px; color: var(--accent); opacity: 0.75; font-weight: 400;
+  pointer-events: none;
+}
+.header-nav-right {
+  position: absolute; right: 0; display: flex; align-items: center;
+}
+.nav-btn {
+  width: 32px; height: 32px; display: flex; align-items: center;
+  justify-content: center; cursor: pointer; color: #666; border-radius: 50%;
+}
+.nav-btn:active { background: rgba(0,0,0,0.06); }
+.header-title { font-size: 28px; font-weight: 700; color: var(--text); line-height: 1.2; margin-bottom: 5px; }
+.header-meta { font-size: 13px; color: var(--text); line-height: 1.8; }
+
+/* ── Tabs ── */
+.tabs {
+  position: absolute; top: var(--header-h); left: 0; right: 0;
+  height: var(--tab-h); background: #fff;
+  border-bottom: 1px solid var(--border);
+  display: flex; overflow-x: auto; z-index: 99;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex: 0 0 auto; padding: 0 16px; height: 100%;
+  display: flex; align-items: center;
+  font-size: 14px; color: var(--text-sub);
+  cursor: pointer; white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color .2s, border-color .2s;
+}
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+/* ── Content ── */
+.content {
+  position: absolute;
+  top: calc(var(--header-h) + var(--tab-h));
+  left: 0; right: 0; bottom: 0;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Panel ── */
+.panel {
+  background: #fff;
+  padding: 22px 16px 40px;
+}
+
+/* ── 概述小圆点列表 ── */
+.ov-list { margin-bottom: 24px; }
+.ov-item { display: flex; gap: 8px; margin-bottom: 8px; align-items: flex-start; }
+.ov-item:last-child { margin-bottom: 0; }
+.ov-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 7px; }
+.ov-content { font-size: 13px; line-height: 1.6; color: var(--text-body); }
+.ov-label { font-size: 12px; font-weight: 700; color: var(--accent); }
+
+/* ── 版块小节标题 ── */
+.sec-title { font-size: 17px; font-weight: 700; color: var(--text); margin: 26px 0 12px; }
+.sec-title:first-child { margin-top: 0; }
+.def-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 14px; padding-top: 4px; }
+
+/* ── 正文 ── */
+.body-p { font-size: 15px; line-height: 1.8; color: var(--text-body); margin-bottom: 10px; }
+.body-p:last-child { margin-bottom: 0; }
+
+/* ── 普通列表 ── */
+.pl-item { display: flex; gap: 10px; font-size: 15px; line-height: 1.75; color: var(--text-body); margin-bottom: 10px; align-items: flex-start; }
+.pl-item:last-child { margin-bottom: 0; }
+.pl-dot { width: 5px; height: 5px; border-radius: 50%; background: #bbb; flex-shrink: 0; margin-top: 9px; }
+.pl-dot-accent { background: var(--accent); }
+.pl-dot-warn { background: #ffb300; }
+
+/* ── 分型格子 ── */
+.type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.type-cell { border: 1px solid #e0f7f5; border-radius: 10px; padding: 12px 11px; }
+.tc-name { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+.tc-desc { font-size: 13px; color: var(--text-body); line-height: 1.55; }
+
+/* ── 警告条 ── */
+.warn-bar { border-left: 3px solid #ffb300; background: #fffbf0; padding: 11px 13px; font-size: 14px; line-height: 1.7; color: #5d4037; margin: 16px 0; }
+
+/* ── 表格 ── */
+.tbl-wrap { overflow-x: auto; margin-bottom: 16px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--accent-light); color: var(--accent); font-weight: 600; padding: 9px 10px; text-align: left; border-bottom: 1px solid #b2dfdb; }
+td { padding: 10px; border-bottom: 1px solid #f5f5f5; color: var(--text-body); line-height: 1.55; vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+
+/* ── 带标题列表项 ── */
+.entry-item { padding: 14px 0 14px 14px; border-left: 3px solid var(--accent); margin-bottom: 12px; }
+.entry-item:last-child { margin-bottom: 0; }
+.entry-name { font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 5px; line-height: 1.4; }
+.entry-desc { font-size: 14px; color: #555; line-height: 1.7; }
+
+/* ── 参考文献 ── */
+.refs-panel { background: #fff; padding: 20px 16px 60px; }
+.refs-label { font-size: 13px; font-weight: 600; color: #888; margin-bottom: 10px; }
+.ref-item { font-size: 12px; color: #888; line-height: 1.6; padding: 6px 0; border-bottom: 1px solid #f5f5f5; }
+.ref-item:last-child { border-bottom: none; }
+.refs-more { display: none; }
+.refs-more.open { display: block; }
+.refs-toggle { font-size: 12px; color: var(--accent); cursor: pointer; margin-top: 8px; display: inline-block; }
+
+/* ── 分隔线 ── */
+.divider { height: 1px; background: #f5f5f5; margin: 20px 0; }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-nav">
+      <div class="header-brand-center">美团买药·互联网医院</div>
+      <div class="header-nav-right">
+        <div class="nav-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </svg>
+        </div>
+        <div class="nav-btn" onclick="window.parent.postMessage({ action: 'close' }, '*')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="header-title">玫瑰痤疮</div>
+    <div class="header-meta">别称：酒渣鼻</div>
+    <div class="header-meta">就诊科室：皮肤科</div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-idx="0">概述</div>
+    <div class="tab" data-idx="1">病因</div>
+    <div class="tab" data-idx="2">症状</div>
+    <div class="tab" data-idx="3">就医</div>
+    <div class="tab" data-idx="4">治疗</div>
+    <div class="tab" data-idx="5">预后</div>
+    <div class="tab" data-idx="6">日常</div>
+  </div>
+
+  <!-- Content -->
+  <div class="content" id="content">
+
+    <!-- ══ 0. 概述 ══ -->
+    <div class="panel" id="panel-0">
+      <div class="ov-list">
+        <div class="ov-item">
+          <div class="ov-dot"></div>
+          <div class="ov-content"><span class="ov-label">定义：</span>面部持续泛红、反复丘疹脓疱、血管扩张的慢性炎症性皮肤病。</div>
+        </div>
+        <div class="ov-item">
+          <div class="ov-dot"></div>
+          <div class="ov-content"><span class="ov-label">病因：</span>多由皮肤屏障受损、免疫过度反应与血管调节紊乱共同引起。</div>
+        </div>
+        <div class="ov-item">
+          <div class="ov-dot"></div>
+          <div class="ov-content"><span class="ov-label">诊断：</span>需皮肤科医生通过皮肤镜检查综合判断。</div>
+        </div>
+        <div class="ov-item">
+          <div class="ov-dot"></div>
+          <div class="ov-content"><span class="ov-label">治疗：</span>几乎不可能根治，外用甲硝唑或壬二酸，重度加口服多西环素或激光治疗。</div>
+        </div>
+      </div>
+
+      <div class="def-title">玫瑰痤疮是什么？</div>
+      <div class="body-p">玫瑰痤疮虽然名字里带"痤疮"，但它和普通青春痘完全不是一回事。它是一种慢性炎症性皮肤病，主要发生在面部中央区域（鼻子、脸颊、额头、下巴），以持续性泛红、反复出现的丘疹脓疱、皮肤血管扩张为核心特征，部分人还会出现鼻子增大变形（也就是俗称的"酒渣鼻"）。</div>
+      <div class="body-p">它不会传染，也不是因为不讲卫生引起的，而是一种需要长期管理的慢性病。</div>
+
+      <div class="sec-title">分型</div>
+      <div class="body-p">玫瑰痤疮根据主要表现分为四种类型，不同类型的治疗方向不同：</div>
+      <div class="type-grid">
+        <div class="type-cell">
+          <div class="tc-name">红斑毛细血管扩张型</div>
+          <div class="tc-desc">脸持续发红，能看到细小红血丝，遇热或情绪激动时加重</div>
+        </div>
+        <div class="type-cell">
+          <div class="tc-name">丘疹脓疱型</div>
+          <div class="tc-desc">在持续泛红的基础上，反复出现红色丘疹和脓疱，外观像痤疮</div>
+        </div>
+        <div class="type-cell">
+          <div class="tc-name">鼻赘型</div>
+          <div class="tc-desc">鼻子皮肤增厚、毛孔粗大、逐渐变形增大，多见于中老年男性</div>
+        </div>
+        <div class="type-cell">
+          <div class="tc-name">眼型</div>
+          <div class="tc-desc">眼睛发红、干涩、有异物感，眼睑边缘发炎，可与其他类型同时出现</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 1. 病因 ══ -->
+    <div class="panel" id="panel-1">
+      <div class="body-p">玫瑰痤疮的确切原因目前还没有完全搞清楚，但研究发现它是多种因素共同作用的结果，不是单一原因造成的。</div>
+
+      <div class="sec-title">主要病因</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>皮肤屏障受损：</strong>皮肤的保护层变薄或功能下降，外界刺激更容易引发炎症反应，导致持续泛红和敏感。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>免疫反应过度：</strong>皮肤对正常的外界刺激（如温度变化、紫外线、皮肤上的微生物）产生过度的炎症反应，引发丘疹和脓疱。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>血管调节紊乱：</strong>面部血管对刺激过于敏感，容易扩张且难以收缩，造成持续性泛红和潮红发作。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>蠕形螨过度繁殖：</strong>皮肤上一种正常存在的微小螨虫，在玫瑰痤疮患者中数量明显偏多，可能参与了炎症的触发。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>遗传因素：</strong>有家族史的人更容易发病，说明基因在其中起到一定作用。</div></div>
+
+      <div class="sec-title">常见诱发和加重因素</div>
+      <div class="body-p">以下这些因素不是病因，但会让症状明显加重，需要在日常中注意避开：</div>
+      <div class="pl-item"><div class="pl-dot"></div><div>日晒和紫外线照射</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>高温环境、蒸桑拿、剧烈运动后体温升高</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>辛辣食物、酒精（尤其是红酒）</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>情绪激动、压力大</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>使用含酒精、香精、去角质成分的护肤品</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>长期使用含激素的外用药膏（可能诱发激素依赖性皮炎，与玫瑰痤疮症状相似）</div></div>
+
+      <div class="sec-title">哪些人更容易得这个病</div>
+      <div class="pl-item"><div class="pl-dot"></div><div>皮肤白皙、容易脸红的人（尤其是北欧裔，但亚洲人同样会发病）</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>有玫瑰痤疮家族史的人</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>30～50 岁的成年人，女性发病率高于男性，但男性更容易出现鼻赘型</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>长期户外工作、日晒多的人</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>皮肤屏障薄弱、长期使用刺激性护肤品的人</div></div>
+    </div>
+
+    <!-- ══ 2. 症状 ══ -->
+    <div class="panel" id="panel-2">
+      <div class="body-p">玫瑰痤疮的症状主要集中在面部中央区域，不同分型的表现有所不同，但几乎所有人都会有不同程度的面部泛红。</div>
+
+      <div class="sec-title">常见表现</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>持续性面部泛红：</strong>脸颊、鼻子、额头或下巴长期发红，不是一阵一阵的，而是持续存在，遇热、喝酒、情绪激动时会明显加重。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>潮红发作：</strong>突然感到脸部发热、发红，持续几分钟到几十分钟，之后消退，但反复出现。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>丘疹和脓疱：</strong>面部出现红色小疙瘩或有白色脓头的脓疱，外观和青春痘很像，但没有粉刺（黑头/白头）。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>可见红血丝：</strong>面部皮肤下能看到细小的红色血管，尤其是鼻翼两侧和脸颊。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>皮肤灼热、刺痛或紧绷感：</strong>用护肤品或洗脸时容易感到刺激，皮肤比较敏感。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>鼻子变形（鼻赘型）：</strong>鼻子皮肤逐渐增厚、毛孔粗大、外形变大变圆，多见于中老年男性，进展缓慢。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>眼部不适（眼型）：</strong>眼睛发红、干涩、有沙粒感，眼睑边缘发炎，对光敏感，可能同时伴有其他类型的皮肤症状。</div></div>
+
+      <div class="sec-title">出现这些情况要尽快去看医生</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-warn"></div><div>眼睛持续发红、视力模糊或眼部疼痛，可能是眼型玫瑰痤疮影响到角膜，需要尽快就诊</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-warn"></div><div>鼻子或面部皮肤快速增厚变形，影响外观和功能</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-warn"></div><div>自行用药后症状持续加重，或出现大面积皮肤破损</div></div>
+    </div>
+
+    <!-- ══ 3. 就医 ══ -->
+    <div class="panel" id="panel-3">
+      <div class="sec-title" style="margin-top:0;">去哪个科</div>
+      <div class="body-p">挂<strong>皮肤科</strong>。如果有明显的眼部症状（眼红、视力变化），同时需要看<strong>眼科</strong>。</div>
+
+      <div class="sec-title">什么时候需要去看医生</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>脸部持续泛红超过 3 个月，遇热或情绪激动时明显加重</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>面部反复出现红色丘疹或脓疱，但没有粉刺，用普通祛痘产品无效</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>脸颊或鼻翼出现明显的红血丝，越来越多</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>鼻子皮肤开始增厚、毛孔变粗大</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>眼睛反复发红、干涩、有异物感，排除干眼症后仍未好转</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>症状影响到日常生活和心理状态</div></div>
+
+      <div class="sec-title">去看医生前可以准备什么</div>
+      <div class="body-p">记录一下症状出现多久了、哪些情况会让脸更红（比如喝酒、晒太阳、吃辣）、之前用过哪些护肤品或药膏（尤其是含激素的）。如果有症状加重时的照片，带给医生看会很有帮助。</div>
+
+      <div class="sec-title">医生通常会做哪些检查</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>检查项目</th><th>用来看什么</th></tr>
+          <tr><td>皮肤镜检查</td><td>用来看皮肤表面的血管分布、毛囊情况，帮助与痤疮、红斑狼疮等区分</td></tr>
+          <tr><td>蠕形螨检测</td><td>用来看皮肤上蠕形螨的数量是否明显偏多</td></tr>
+          <tr><td>皮肤活检（少数情况）</td><td>用来看皮肤组织的炎症类型，在诊断不明确时使用</td></tr>
+          <tr><td>裂隙灯检查（眼型）</td><td>用来看眼睑和角膜是否受到影响</td></tr>
+        </table>
+      </div>
+
+      <div class="warn-bar">玫瑰痤疮和普通痤疮、激素依赖性皮炎、红斑狼疮外观很像，自行判断容易误诊，建议去皮肤科让医生确认，不要自行用药。</div>
+    </div>
+
+    <!-- ══ 4. 治疗 ══ -->
+    <div class="panel" id="panel-4">
+      <div class="body-p">玫瑰痤疮目前没有根治的方法，治疗的目标是控制症状、减少发作、防止进展。医生会根据你的分型和严重程度制定方案，通常需要几个月才能看到明显效果。</div>
+
+      <div class="sec-title">主要治疗方式</div>
+      <div class="entry-item">
+        <div class="entry-name">外用药物</div>
+        <div class="entry-desc">适用于丘疹脓疱型和轻中度红斑型。常用甲硝唑凝胶（抗炎）、壬二酸乳膏（抗炎+改善泛红）、伊维菌素乳膏（针对蠕形螨）。需要每天坚持使用，通常 4～8 周后开始见效。</div>
+      </div>
+      <div class="entry-item">
+        <div class="entry-name">口服药物</div>
+        <div class="entry-desc">适用于中重度丘疹脓疱型。医生通常会开低剂量多西环素（抗炎作用，不是抗菌），疗程一般 3～6 个月。不建议长期使用，症状控制后逐步减量。</div>
+      </div>
+      <div class="entry-item">
+        <div class="entry-name">激光和强脉冲光（IPL）</div>
+        <div class="entry-desc">适用于红血丝明显、持续泛红的红斑毛细血管扩张型。通过光热作用收缩扩张的血管，改善泛红和红血丝。通常需要多次治疗，每次间隔 4～6 周。</div>
+      </div>
+      <div class="entry-item">
+        <div class="entry-name">眼部专项治疗</div>
+        <div class="entry-desc">眼型玫瑰痤疮需要眼科配合，常用人工泪液缓解干涩，眼睑清洁减少炎症，严重时医生会开眼用抗生素或抗炎滴眼液。</div>
+      </div>
+
+      <div class="sec-title">什么情况下需要手术</div>
+      <div class="body-p">鼻赘型玫瑰痤疮在皮肤明显增厚变形后，药物和激光效果有限，必要时需要通过手术（如二氧化碳激光磨削或外科切除）来改善外形。</div>
+    </div>
+
+    <!-- ══ 5. 预后 ══ -->
+    <div class="panel" id="panel-5">
+      <div class="body-p">玫瑰痤疮是一种慢性病，目前没有办法彻底根治，但通过规范治疗和日常管理，绝大多数人都能把症状控制在可接受的范围内，不影响正常生活。</div>
+      <div class="body-p">它的病程通常是反复发作的——治疗后症状会明显改善，但遇到诱发因素（日晒、饮酒、压力大）可能再次加重。这是这个病的特点，不代表治疗失败，坚持管理是关键。</div>
+
+      <div class="sec-title">不同分型的预后</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>红斑毛细血管扩张型：</strong>激光治疗对红血丝效果较好，但泛红容易反复，需要长期避开诱发因素。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>丘疹脓疱型：</strong>规范用药后丘疹脓疱通常能明显减少，但停药后可能复发，部分人需要维持治疗。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>鼻赘型：</strong>一旦皮肤增厚变形，药物无法逆转，需要手术干预，且手术后仍需长期管理防止进展。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>眼型：</strong>多数人经过治疗后眼部症状可以控制，但少数人如果延误治疗可能影响视力。</div></div>
+
+      <div class="sec-title">影响恢复的因素</div>
+      <div class="pl-item"><div class="pl-dot"></div><div>是否坚持规范用药，没有自行停药或换药</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>日常是否严格防晒，避开已知的诱发因素</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>护肤品是否温和，没有使用刺激性成分</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>是否定期复诊，根据病情变化及时调整方案</div></div>
+
+      <div class="sec-title">可能出现的并发症</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-warn"></div><div><strong>角膜损伤：</strong>眼型玫瑰痤疮如果长期未治疗，炎症可能累及角膜，影响视力。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-warn"></div><div><strong>心理影响：</strong>长期面部泛红和外观改变容易引发焦虑、社交回避等心理问题，必要时可寻求心理支持。</div></div>
+    </div>
+
+    <!-- ══ 6. 日常 ══ -->
+    <div class="panel" id="panel-6">
+      <div class="sec-title" style="margin-top:0;">日常注意事项</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>严格防晒：</strong>每天出门前涂防晒霜（SPF 30 以上），选择物理防晒成分（氧化锌、二氧化钛）更温和，避免长时间日晒。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>温和洁面：</strong>用温水（不用热水）和无香精、无皂基的温和洁面产品，洗完用软毛巾轻轻按压吸干，不要用力擦。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>简化护肤：</strong>护肤品越少越好，选择成分简单、无酒精、无香精、无去角质成分的产品，新产品先在耳后小范围测试。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>避开高温环境：</strong>减少蒸桑拿、泡热水澡、长时间待在高温厨房等场景，运动后及时降温。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>记录诱发因素：</strong>用手机记录每次症状加重前做了什么、吃了什么，找出自己的个人诱发因素，有针对性地避开。</div></div>
+
+      <div class="sec-title">吃什么、不吃什么</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-warn"></div><div><strong>需要减少或避免：</strong>酒精（尤其是红酒和啤酒）、辛辣食物、过烫的饮食，这些是最常见的诱发因素。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>可以多吃：</strong>富含抗氧化成分的食物（深色蔬菜、浆果类），有助于减轻炎症反应。</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div><strong>因人而异：</strong>部分人对咖啡因、某些乳制品或高糖食物敏感，可以通过记录饮食日记来判断自己是否需要控制。</div></div>
+
+      <div class="sec-title">运动</div>
+      <div class="body-p">适度运动对整体健康有益，但高强度运动会让体温升高、面部充血，可能诱发潮红。建议选择游泳（水温凉爽）、瑜伽、散步等低强度运动，运动时注意降温，避免在高温时段户外运动。</div>
+
+      <div class="sec-title">什么时候需要复查</div>
+      <div class="body-p">开始治疗后建议每 4～8 周复查一次，让医生评估用药效果和皮肤状态。症状稳定后可以改为每 3～6 个月复查一次。如果症状突然加重、出现新的皮损类型，或眼部出现不适，随时去看医生。</div>
+    </div>
+
+    <!-- 参考文献 -->
+    <div class="refs-panel">
+      <div class="refs-label">参考文献</div>
+      <div class="ref-item">[1] 中华医学会皮肤性病学分会玫瑰痤疮研究中心. 中国玫瑰痤疮诊疗指南（2021版）. 中华皮肤科杂志, 2021.</div>
+      <div class="ref-item">[2] Tan J, et al. Updating the diagnosis, classification and assessment of rosacea: recommendations from the global ROSacea COnsensus (ROSCO) panel. Br J Dermatol, 2017.</div>
+      <div class="ref-item">[3] Schaller M, et al. Recommendations for rosacea diagnosis, classification and management. J Eur Acad Dermatol Venereol, 2016.</div>
+      <div class="refs-more" id="refs-more">
+        <div class="ref-item">[4] van Zuuren EJ, et al. Interventions for rosacea. Cochrane Database Syst Rev, 2019.</div>
+        <div class="ref-item">[5] 赵辨. 中国临床皮肤病学（第2版）. 江苏凤凰科学技术出版社, 2017.</div>
+        <div class="ref-item">[6] Gallo RL, et al. Standard classification and pathophysiology of rosacea: The 2017 update by the National Rosacea Society Expert Committee. J Am Acad Dermatol, 2018.</div>
+      </div>
+      <span class="refs-toggle" id="refs-toggle" onclick="toggleRefs()">展开全部</span>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const tabs    = document.querySelectorAll('.tab');
+const content = document.getElementById('content');
+const panels  = document.querySelectorAll('.panel');
+const tabsEl  = document.getElementById('tabs');
+
+let isClickScrolling = false;
+let clickScrollTimer = null;
+
+tabs.forEach((tab, idx) => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+
+    const target = panels[idx];
+    if (target) {
+      isClickScrolling = true;
+      clearTimeout(clickScrollTimer);
+      clickScrollTimer = setTimeout(() => { isClickScrolling = false; }, 800);
+
+      // .content 从 tabs 底部开始，offsetTop 已是纯内容偏移，直接使用
+        content.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+    }
+  });
+});
+
+content.addEventListener('scroll', () => {
+  if (isClickScrolling) return;
+
+  const scrollTop  = content.scrollTop;
+  const tabsHeight = tabsEl.offsetHeight;
+  const THRESHOLD  = tabsHeight + 16;
+
+  let active = 0;
+  panels.forEach((p, i) => {
+    if (p.offsetTop - THRESHOLD <= scrollTop) active = i;
+  });
+
+  tabs.forEach((t, i) => t.classList.toggle('active', i === active));
+  const activeTab = tabs[active];
+  if (activeTab) activeTab.scrollIntoView({ block: 'nearest', inline: 'center' });
+});
+
+// 参考文献折叠
+function toggleRefs() {
+  const m = document.getElementById('refs-more');
+  const t = document.getElementById('refs-toggle');
+  t.textContent = m.classList.toggle('open') ? '收起' : '展开全部';
+}
+</script>
+</body>
+</html>
