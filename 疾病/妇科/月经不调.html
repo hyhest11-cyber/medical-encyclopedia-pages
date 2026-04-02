@@ -1,0 +1,465 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>月经不调 - 健康百科</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --accent: #F06292;
+  --accent-light: #FDE8EF;
+  --header-bg: linear-gradient(160deg, #FDE8EF 0%, #FFF5F8 60%, #ffffff 100%);
+  --text: #1a1a1a;
+  --text-sub: #999;
+  --text-body: #333;
+  --border: #efefef;
+  --header-h: 148px;
+  --tab-h: 44px;
+}
+
+html, body {
+  height: 100%; overflow: hidden; background: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+.page-wrap { max-width: 480px; margin: 0 auto; height: 100vh; position: relative; overflow: hidden; background: #fff; }
+
+/* ── Header ── */
+.header {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: var(--header-h);
+  background: var(--header-bg);
+  z-index: 100;
+  padding: 0 16px 18px;
+  display: flex; flex-direction: column; justify-content: flex-end;
+}
+.header-nav {
+  position: absolute; top: 14px; left: 16px; right: 16px;
+  display: flex; justify-content: center; align-items: center;
+}
+.header-brand-center {
+  flex: 1; text-align: center;
+  font-size: 13px; color: var(--accent); opacity: 0.75; font-weight: 400;
+  pointer-events: none;
+}
+.header-nav-right {
+  position: absolute; right: 0; display: flex; align-items: center;
+}
+.nav-btn {
+  width: 32px; height: 32px; display: flex; align-items: center;
+  justify-content: center; cursor: pointer; color: #666; border-radius: 50%;
+}
+.nav-btn:active { background: rgba(0,0,0,0.06); }
+.header-title { font-size: 28px; font-weight: 700; color: var(--text); line-height: 1.2; margin-bottom: 5px; }
+.header-meta { font-size: 13px; color: #1a1a1a; line-height: 1.8; }
+
+/* ── Tabs ── */
+.tabs {
+  position: absolute; top: var(--header-h); left: 0; right: 0;
+  height: var(--tab-h); background: #fff;
+  border-bottom: 1px solid var(--border);
+  display: flex; overflow-x: auto; z-index: 99;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex: 0 0 auto; padding: 0 16px; height: 100%;
+  display: flex; align-items: center;
+  font-size: 14px; color: var(--text-sub);
+  cursor: pointer; white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color .2s, border-color .2s;
+}
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+/* ── Content ── */
+.content {
+  position: absolute;
+  top: calc(var(--header-h) + var(--tab-h));
+  left: 0; right: 0; bottom: 0;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Panel ── */
+.panel {
+  background: #fff;
+  padding: 22px 16px 40px;
+}
+
+/* ── 概述小圆点列表 ── */
+.ov-list { margin-bottom: 24px; }
+.ov-item { display: flex; gap: 8px; margin-bottom: 8px; align-items: flex-start; }
+.ov-item:last-child { margin-bottom: 0; }
+.ov-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 7px; }
+.ov-content { font-size: 13px; line-height: 1.6; color: var(--text-body); }
+.ov-label { font-size: 12px; font-weight: 700; color: var(--accent); }
+
+/* ── 版块标题（非概述版块顶部必须使用） ── */
+.panel-title {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 20px; font-weight: 700; color: var(--text);
+  margin-bottom: 20px;
+}
+.panel-title::before {
+  content: ''; display: block;
+  width: 4px; height: 22px; border-radius: 2px;
+  background: var(--accent); flex-shrink: 0;
+}
+/* ── 版块小节标题 ── */
+.sec-title { font-size: 17px; font-weight: 700; color: var(--text); margin: 26px 0 12px; }
+.def-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 14px; padding-top: 4px; }
+
+/* ── 正文 ── */
+.body-p { font-size: 15px; line-height: 1.8; color: var(--text-body); margin-bottom: 10px; }
+.body-p:last-child { margin-bottom: 0; }
+
+/* ── 普通列表 ── */
+.pl-item { display: flex; gap: 10px; font-size: 15px; line-height: 1.75; color: var(--text-body); margin-bottom: 10px; align-items: flex-start; }
+.pl-item:last-child { margin-bottom: 0; }
+.pl-dot { width: 5px; height: 5px; border-radius: 50%; background: #bbb; flex-shrink: 0; margin-top: 9px; }
+.pl-dot-accent { background: var(--accent); }
+.pl-dot-green { background: #66bb6a; }
+.pl-dot-warn { background: #ffb300; }
+
+/* ── 症状格子 ── */
+.symptom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.symptom-cell { border: 1px solid #f0f0f0; border-radius: 10px; padding: 12px 11px; }
+.sc-name { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+.sc-desc { font-size: 13px; color: var(--text-body); line-height: 1.55; }
+
+/* ── 警告条 ── */
+.warn-bar { border-left: 3px solid #ffb300; background: #fffbf0; padding: 11px 13px; font-size: 14px; line-height: 1.7; color: #5d4037; margin: 16px 0; }
+
+/* ── 表格 ── */
+.tbl-wrap { overflow-x: auto; margin-bottom: 16px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--accent-light); color: var(--accent); font-weight: 600; padding: 9px 10px; text-align: left; border-bottom: 1px solid #f5c6d8; }
+td { padding: 10px; border-bottom: 1px solid #f5f5f5; color: var(--text-body); line-height: 1.55; vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+
+/* ── 带标题列表项 ── */
+.entry-item { padding: 14px 0 14px 14px; border-left: 3px solid var(--accent); margin-bottom: 12px; }
+.entry-item:last-child { margin-bottom: 0; }
+.entry-name { font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 5px; line-height: 1.4; }
+.entry-desc { font-size: 14px; color: #555; line-height: 1.7; }
+
+/* ── 参考文献 ── */
+.refs-panel { background: #fff; padding: 20px 16px 60px; }
+.refs-label { font-size: 13px; font-weight: 600; color: #888; margin-bottom: 10px; }
+.ref-item { font-size: 12px; color: #888; line-height: 1.6; padding: 6px 0; border-bottom: 1px solid #f5f5f5; }
+.ref-item:last-child { border-bottom: none; }
+.refs-more { display: none; }
+.refs-more.open { display: block; }
+.refs-toggle { font-size: 12px; color: var(--accent); cursor: pointer; margin-top: 8px; display: inline-block; }
+
+/* ── 分隔线 ── */
+.divider { height: 1px; background: #f5f5f5; margin: 20px 0; }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-nav">
+      <div class="header-brand-center">美团买药·互联网医院</div>
+      <div class="header-nav-right">
+        <div class="nav-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </svg>
+        </div>
+        <div class="nav-btn" onclick="window.parent.postMessage({ action: 'close' }, '*')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="header-title">月经不调</div>
+    <div class="header-meta">别称：月经失调</div>
+    <div class="header-meta">就诊科室：妇科</div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-idx="0">概述</div>
+    <div class="tab" data-idx="1">病因</div>
+    <div class="tab" data-idx="2">症状</div>
+    <div class="tab" data-idx="3">就医</div>
+    <div class="tab" data-idx="4">治疗</div>
+    <div class="tab" data-idx="5">预后</div>
+    <div class="tab" data-idx="6">日常</div>
+  </div>
+
+  <!-- Content -->
+  <div class="content" id="content">
+
+    <!-- ══ 0. 概述 ══ -->
+    <div class="panel" id="panel-0">
+      <div class="ov-list">
+        <div class="ov-item">
+          <div class="ov-dot"></div>
+          <div class="ov-content"><span class="ov-label">定义：</span>周期、经期或出血量长期超出正常范围即为月经不调。</div>
+        </div>
+        <div class="ov-item">
+          <div class="ov-dot"></div>
+          <div class="ov-content"><span class="ov-label">病因：</span>多由精神压力、作息紊乱或基础疾病引起。</div>
+        </div>
+        <div class="ov-item">
+          <div class="ov-dot"></div>
+          <div class="ov-content"><span class="ov-label">治疗：</span>针对病因，调整生活方式或用激素药物调节周期。</div>
+        </div>
+      </div>
+
+      <div class="def-title">月经不调是什么？</div>
+      <div class="body-p">月经不调是指月经的周期、持续时间或出血量超出正常范围，且持续出现的一类妇科问题。正常月经周期是 21～35 天，每次持续 2～7 天，出血量约 20～80 毫升。如果你的月经长期不在这个范围内，就属于月经不调。</div>
+      <div class="body-p">月经不调本身不是一种单一的疾病，而是多种原因都可能导致的月经变化，找到背后的原因才是关键。</div>
+    </div>
+
+    <!-- ══ 1. 病因 ══ -->
+    <div class="panel" id="panel-1">
+      <h2 class="panel-title">病因</h2>
+      <div class="body-p">月经是由大脑、垂体和卵巢共同"指挥"的，这套系统一旦出现问题，月经就会乱。引起月经不调的原因很多，大致分为以下几类。</div>
+
+      <div class="sec-title">生活方式因素</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>精神压力大、情绪波动：</strong>长期焦虑或突然受到强烈刺激，会影响大脑对月经的调控，导致周期紊乱。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>作息不规律、睡眠不足：</strong>熬夜、昼夜颠倒会打乱体内激素节律，月经容易推迟或提前。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>体重骤然变化：</strong>短时间内大幅减重（如过度节食）或快速增重，都会影响雌激素水平，导致月经减少甚至停止。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>剧烈运动：</strong>高强度训练者因体脂率过低，月经可能变少或消失。</div></div>
+
+      <div class="sec-title">激素与药物因素</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>服用激素类药物：</strong>紧急避孕药、短效避孕药、含激素的保健品等，都可能影响月经周期。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>放置宫内节育器：</strong>部分人放环后会出现月经量增多或不规则出血。</div></div>
+
+      <div class="sec-title">基础疾病因素</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>多囊卵巢综合征：</strong>卵巢不能正常排卵，是导致月经不规律最常见的疾病之一。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>甲状腺疾病：</strong>甲亢或甲减都会影响月经，甲减常导致月经量增多，甲亢则可能导致月经减少。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>子宫或卵巢问题：</strong>子宫肌瘤、子宫内膜息肉、卵巢早衰等，也会引起月经变化。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>泌乳素过高：</strong>脑垂体分泌的泌乳素过多，会抑制排卵，导致月经减少甚至停止。</div></div>
+
+      <div class="sec-title">哪些人更容易出现月经不调</div>
+      <div class="pl-item"><div class="pl-dot"></div><div>长期处于高压状态、睡眠质量差的人</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>体重过轻或短期内体重变化超过 10% 的人</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>有多囊卵巢综合征家族史的人</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>正在服用激素类药物或刚停药的人</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>处于青春期或更年期前后的人</div></div>
+    </div>
+
+    <!-- ══ 2. 症状 ══ -->
+    <div class="panel" id="panel-2">
+      <h2 class="panel-title">症状</h2>
+      <div class="body-p">月经不调的表现因人而异，主要体现在周期、经期长短和出血量三个方面的变化。</div>
+
+      <div class="sec-title">周期变化</div>
+      <div class="symptom-grid">
+        <div class="symptom-cell">
+          <div class="sc-name">月经提前</div>
+          <div class="sc-desc">比上次提前超过 7 天，连续出现 2 次以上</div>
+        </div>
+        <div class="symptom-cell">
+          <div class="sc-name">月经推迟</div>
+          <div class="sc-desc">比上次推迟超过 7 天，连续出现 2 次以上</div>
+        </div>
+        <div class="symptom-cell">
+          <div class="sc-name">周期不规律</div>
+          <div class="sc-desc">忽早忽晚，相邻两次周期相差超过 7 天</div>
+        </div>
+        <div class="symptom-cell">
+          <div class="sc-name">月经停止</div>
+          <div class="sc-desc">连续 3 个月没来，确认不是怀孕</div>
+        </div>
+      </div>
+
+      <div class="sec-title">经期与出血量变化</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>经期过长：</strong>每次月经持续超过 7 天，甚至拖到 10 天以上才干净</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>经期过短：</strong>每次月经不到 2 天就结束了</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>月经量过多：</strong>每次用的卫生巾超过 20 片，或血块很多、需要频繁更换</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>月经量过少：</strong>整个经期用不到 2 片卫生巾</div></div>
+
+      <div class="sec-title">可能同时出现的其他表现</div>
+      <div class="pl-item"><div class="pl-dot"></div><div>痛经（经期腹痛）</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>经前乳房胀痛、情绪波动</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>非经期出现少量出血（点滴出血）</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>脸上长痘、体毛增多（可能提示多囊卵巢综合征）</div></div>
+
+      <div class="warn-bar">月经量突然大幅增多、出血不止，或者伴有剧烈腹痛、发烧，建议尽快去看医生，不要拖。</div>
+    </div>
+
+    <!-- ══ 3. 就医 ══ -->
+    <div class="panel" id="panel-3">
+      <h2 class="panel-title">就医</h2>
+      <div class="sec-title">去哪个科</div>
+      <div class="body-p">挂<strong>妇科</strong>即可。如果同时有甲状腺问题，可能还需要看内分泌科。</div>
+
+      <div class="sec-title">什么时候需要去看医生</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>月经连续 3 个月没来，而且确认不是怀孕</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>月经周期或出血量的变化持续超过 3 个月，没有好转</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>月经量突然大幅增多，或者出血超过 10 天还没停</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>两次月经之间出现不明原因的出血</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>月经不调同时伴有脸上长痘、体毛增多、体重快速增加</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>备孕期间月经不规律，影响排卵预测</div></div>
+
+      <div class="sec-title">去看医生前可以准备什么</div>
+      <div class="body-p">提前记录最近 3～6 个月的月经情况，包括：每次月经开始和结束的日期、出血量（用了多少片卫生巾）、有没有血块、有没有痛经。如果在服用任何药物（包括避孕药、保健品），记得告诉医生。</div>
+
+      <div class="sec-title">医生通常会做哪些检查</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>检查项目</th><th>用来看什么</th></tr>
+          <tr><td>性激素六项</td><td>看雌激素、孕激素、促卵泡素等激素水平是否正常</td></tr>
+          <tr><td>盆腔超声</td><td>看子宫和卵巢的形态，排查多囊卵巢、肌瘤、囊肿等</td></tr>
+          <tr><td>甲状腺功能</td><td>看甲状腺激素水平，排查甲亢或甲减</td></tr>
+          <tr><td>泌乳素检测</td><td>看泌乳素是否过高，排查高泌乳素血症</td></tr>
+          <tr><td>妊娠试验（尿HCG）</td><td>排除怀孕的可能</td></tr>
+          <tr><td>宫颈细胞学（TCT）</td><td>排查宫颈病变（如有不规则出血时）</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ 4. 治疗 ══ -->
+    <div class="panel" id="panel-4">
+      <h2 class="panel-title">治疗</h2>
+      <div class="body-p">月经不调的治疗方向取决于病因。找到原因之后，医生会制定针对性的方案，不是所有人都需要吃药。</div>
+
+      <div class="sec-title">主要治疗方式</div>
+      <div class="entry-item">
+        <div class="entry-name">调整生活方式</div>
+        <div class="entry-desc">如果月经不调是由压力大、睡眠差、体重骤变引起的，改善这些因素后月经往往会自行恢复。这是最基础也最重要的一步。</div>
+      </div>
+      <div class="entry-item">
+        <div class="entry-name">激素类药物调节周期</div>
+        <div class="entry-desc">医生会根据情况开短效避孕药或孕激素，帮助建立规律的月经周期。这类药物需要按疗程服用，不能随意停药。</div>
+      </div>
+      <div class="entry-item">
+        <div class="entry-name">针对基础疾病治疗</div>
+        <div class="entry-desc">如果是多囊卵巢综合征引起的，医生会用促排卵药物或二甲双胍；如果是甲状腺疾病引起的，先治甲状腺，月经通常会随之改善。</div>
+      </div>
+      <div class="entry-item">
+        <div class="entry-name">止血与补血治疗</div>
+        <div class="entry-desc">如果月经量过多导致贫血，医生会开止血药或补铁药，严重时可能需要输血或手术止血。</div>
+      </div>
+
+      <div class="sec-title">什么情况下需要手术</div>
+      <div class="body-p">大多数月经不调不需要手术。如果是子宫肌瘤、子宫内膜息肉等器质性病变引起的出血，且药物治疗效果不好，医生才会考虑手术。</div>
+    </div>
+
+    <!-- ══ 5. 预后 ══ -->
+    <div class="panel" id="panel-5">
+      <h2 class="panel-title">预后</h2>
+      <div class="body-p">大多数月经不调在找到原因、针对性处理后，月经都能恢复正常，整体预后良好。</div>
+
+      <div class="sec-title">不同情况的恢复预期</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-green"></div><div><strong>生活方式引起的：</strong>调整作息、减压、恢复正常体重后，通常 3～6 个月内月经会自行规律。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-green"></div><div><strong>药物引起的：</strong>停药或换药后，月经一般在 1～3 个月内恢复。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>多囊卵巢综合征：</strong>需要长期管理，通过药物和生活方式干预可以控制症状，但不能根治。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>甲状腺疾病：</strong>甲状腺功能恢复正常后，月经通常随之改善。</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div><strong>卵巢早衰：</strong>需要长期激素替代治疗，生育能力可能受影响。</div></div>
+
+      <div class="sec-title">影响恢复的因素</div>
+      <div class="pl-item"><div class="pl-dot"></div><div>是否找到并处理了根本原因</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>是否坚持按疗程用药，没有随意停药</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>生活方式是否真正改善（睡眠、压力、体重）</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>是否定期复查，及时调整治疗方案</div></div>
+
+      <div class="sec-title">可能出现的并发症</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>贫血：</strong>月经量长期过多会导致缺铁性贫血，出现乏力、头晕、面色苍白。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>不孕：</strong>月经不调常伴随排卵异常，长期不处理可能影响怀孕。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>子宫内膜病变：</strong>长期无排卵导致雌激素持续刺激子宫内膜，增加子宫内膜增生甚至癌变的风险。</div></div>
+    </div>
+
+    <!-- ══ 6. 日常 ══ -->
+    <div class="panel" id="panel-6">
+      <h2 class="panel-title">日常</h2>
+      <div class="sec-title">日常注意事项</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>保持规律作息，尽量在晚上 11 点前入睡，避免长期熬夜。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>学会管理压力，可以通过冥想、散步、和朋友聊天等方式缓解情绪。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>避免短时间内大幅减重，每周减重不超过 0.5～1 公斤比较安全。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>经期注意保暖，避免受凉，尤其是腹部和腰部。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>用手机或日历记录每次月经的开始和结束日期，方便就诊时提供信息。</div></div>
+
+      <div class="sec-title">吃什么、不吃什么</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-green"></div><div><strong>建议多吃：</strong>富含铁的食物（红肉、菠菜、豆类），帮助补充月经失血；富含维生素 B 族的食物（全谷物、坚果），有助于激素代谢。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>适量控制：</strong>咖啡因和酒精，过量摄入可能加重经前不适和激素波动。</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div><strong>没有证据支持：</strong>红糖水、阿胶等对月经不调没有明确的治疗效果，可以喝但不要替代正规治疗。</div></div>
+
+      <div class="sec-title">运动</div>
+      <div class="body-p">适度运动对调节激素、缓解压力有帮助，推荐每周 3～5 次、每次 30 分钟左右的有氧运动，如快走、游泳、瑜伽。避免过度高强度训练，尤其是体重已经偏低的情况下，剧烈运动会加重月经紊乱。</div>
+
+      <div class="sec-title">什么时候需要复查</div>
+      <div class="body-p">开始治疗后，建议每 1～3 个月复查一次，让医生评估月经是否有改善、是否需要调整方案。如果月经已经恢复规律，可以改为每 6 个月复查一次。如果症状反复或出现新的变化，随时去看医生。</div>
+    </div>
+
+    <!-- 参考文献 -->
+    <div class="refs-panel">
+      <div class="refs-label">参考文献</div>
+      <div class="ref-item">[1] 中华医学会妇产科学分会. 异常子宫出血诊断与治疗指南（2022年版）. 中华妇产科杂志, 2022.</div>
+      <div class="ref-item">[2] 中国医师协会妇产科医师分会. 多囊卵巢综合征诊治内分泌专家共识（2018）. 中华内分泌代谢杂志, 2018.</div>
+      <div class="ref-item">[3] Fraser IS, et al. The FIGO recommendations on terminologies and definitions for normal and abnormal uterine bleeding. Semin Reprod Med, 2011.</div>
+      <div class="refs-more" id="refs-more">
+        <div class="ref-item">[4] 谢幸, 孔北华, 段涛. 妇产科学（第9版）. 人民卫生出版社, 2018.</div>
+        <div class="ref-item">[5] Teede HJ, et al. Recommendations from the international evidence-based guideline for the assessment and management of polycystic ovary syndrome. Hum Reprod, 2018.</div>
+        <div class="ref-item">[6] 中华医学会. 临床诊疗指南·妇产科学分册. 人民卫生出版社, 2007.</div>
+      </div>
+      <span class="refs-toggle" id="refs-toggle" onclick="toggleRefs()">展开全部</span>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const tabs    = document.querySelectorAll('.tab');
+const content = document.getElementById('content');
+const panels  = document.querySelectorAll('.panel');
+const tabsEl  = document.getElementById('tabs');
+
+let isClickScrolling = false;
+let clickScrollTimer = null;
+
+tabs.forEach((tab, idx) => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+
+    const target = panels[idx];
+    if (target) {
+      isClickScrolling = true;
+      clearTimeout(clickScrollTimer);
+      clickScrollTimer = setTimeout(() => { isClickScrolling = false; }, 800);
+
+      // .content 从 tabs 底部开始，offsetTop 已是纯内容偏移，直接使用
+        content.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+    }
+  });
+});
+
+content.addEventListener('scroll', () => {
+  if (isClickScrolling) return;
+
+  const scrollTop  = content.scrollTop;
+  const tabsHeight = tabsEl.offsetHeight;
+  const THRESHOLD  = tabsHeight + 16;
+
+  let active = 0;
+  panels.forEach((p, i) => {
+    if (p.offsetTop - THRESHOLD <= scrollTop) active = i;
+  });
+
+  tabs.forEach((t, i) => t.classList.toggle('active', i === active));
+  const activeTab = tabs[active];
+  if (activeTab) activeTab.scrollIntoView({ block: 'nearest', inline: 'center' });
+});
+
+// 参考文献折叠
+function toggleRefs() {
+  const m = document.getElementById('refs-more');
+  const t = document.getElementById('refs-toggle');
+  t.textContent = m.classList.toggle('open') ? '收起' : '展开全部';
+}
+</script>
+</body>
+</html>
