@@ -1,0 +1,652 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>B族链球菌 - 美团买药·互联网医院</title>
+  <style>
+    :root {
+      --bg: #E0F7F5;
+      --bg-grad: linear-gradient(160deg, #E0F7F5 0%, #F0FFFE 60%, #ffffff 100%);
+      --accent: #26A69A;
+      --accent-light: #E0F7F5;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .app {
+      width: 100%;
+      max-width: 480px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;        /* 固定高度，让 .content 成为真正的滚动容器 */
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      background: var(--bg-grad);
+      padding: 14px 16px 20px;
+      flex-shrink: 0;
+    }
+    .header-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-bottom: 14px;
+    }
+    .header-brand {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--accent);
+      opacity: 0.75;
+    }
+    .header-icons {
+      position: absolute;
+      right: 0;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+    .header-icons svg {
+      width: 20px;
+      height: 20px;
+      color: var(--accent);
+      opacity: 0.7;
+      cursor: pointer;
+    }
+    .header-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+    .header-meta {
+      font-size: 13px;
+      color: #1a1a1a;
+      line-height: 1.6;
+    }
+    .header-meta span { display: block; }
+
+    /* Tab */
+    .tabs {
+      display: flex;
+      overflow-x: auto;
+      background: #fff;
+      border-bottom: 1px solid #eee;
+      flex-shrink: 0;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      flex-shrink: 0;
+      padding: 12px 16px;
+      font-size: 14px;
+      color: #888;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* 内容区 */
+    .content {
+      flex: 1;
+      overflow-y: scroll;
+      min-height: 0;         /* flex 子元素必须设置，否则不会收缩产生滚动 */
+      -webkit-overflow-scrolling: touch;
+      position: relative;    /* ⚠️ 锁定 panel.offsetTop 参考系，确保跳转和高亮坐标一致 */
+    }
+    .panel {
+      padding: 22px 16px 40px;
+      background: #fff;
+    }
+
+    /* 版块标题 */
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 20px;
+    }
+    .panel-title::before {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 22px;
+      border-radius: 2px;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* 概述小点 */
+    .ov-list { margin-bottom: 20px; }
+    .ov-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .ov-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      margin-top: 7px;
+    }
+    .ov-text { font-size: 13px; color: #333; line-height: 1.6; }
+    .ov-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* 小节标题 */
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin: 24px 0 12px;
+    }
+    .section-title:first-child { margin-top: 0; }
+
+    /* 正文 */
+    .body-text {
+      font-size: 15px;
+      line-height: 1.8;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    /* 圆点列表（单句条目） */
+    .list-item {
+      display: flex;
+      gap: 10px;
+      font-size: 15px;
+      line-height: 1.75;
+      color: #333;
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+    .list-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #333;
+      flex-shrink: 0;
+      margin-top: 9px;
+    }
+
+    /* 带小标题的圆点列表项（标题加粗 + 说明文字） */
+    .pl-item-titled {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      align-items: flex-start;
+    }
+    .pl-item-titled:last-child { margin-bottom: 0; }
+    .pl-item-titled .list-dot {
+      margin-top: 9px;
+      flex-shrink: 0;
+    }
+    .pl-item-titled-body { flex: 1; }
+    .pl-item-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a1a1a;
+      line-height: 1.5;
+      margin-bottom: 3px;
+    }
+    .pl-item-desc {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.7;
+    }
+
+    /* 注意提示框 */
+    .notice-box {
+      background: #FFF8E1;
+      border-left: 3px solid #FFB300;
+      padding: 12px 14px;
+      border-radius: 0 6px 6px 0;
+      margin-bottom: 16px;
+      font-size: 14px;
+      color: #555;
+      line-height: 1.7;
+    }
+
+    /* 参考文献 */
+    .refs-wrap {
+      margin-top: 32px;
+      padding-top: 16px;
+      border-top: 1px solid #eee;
+    }
+    .refs-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #888;
+      margin-bottom: 8px;
+    }
+    .refs-list { list-style: none; }
+    .refs-list li {
+      font-size: 12px;
+      color: #aaa;
+      line-height: 1.6;
+      margin-bottom: 4px;
+    }
+    .refs-toggle {
+      font-size: 12px;
+      color: var(--accent);
+      cursor: pointer;
+      margin-top: 6px;
+      display: inline-block;
+    }
+    .refs-hidden { display: none; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-nav">
+      <span class="header-brand">美团买药·互联网医院</span>
+      <div class="header-icons">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" onclick="window.parent.postMessage({ action: 'close' }, '*')" style="cursor:pointer"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </div>
+    </div>
+    <div class="header-title">B族链球菌</div>
+    <div class="header-meta">
+      <span>别名：无乳链球菌、GBS</span>
+      <span>类别：细菌（革兰阳性球菌）</span>
+    </div>
+  </div>
+
+  <!-- Tab 导航 -->
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-target="panel-overview">概述</div>
+    <div class="tab" data-target="panel-route">感染途径</div>
+    <div class="tab" data-target="panel-symptom">感染症状</div>
+    <div class="tab" data-target="panel-disease">相关疾病</div>
+    <div class="tab" data-target="panel-test">检测方式</div>
+    <div class="tab" data-target="panel-prevent">防治手段</div>
+  </div>
+
+  <!-- 内容区 -->
+  <div class="content" id="content">
+
+    <!-- 版块一：概述 -->
+    <div class="panel" id="panel-overview">
+      <div class="ov-list">
+        <div class="ov-item">
+          <div class="ov-dot"></div>
+          <div class="ov-text"><span class="ov-label">特征：</span>革兰阳性球菌，可定植于人体肠道和生殖道，属于条件致病菌</div>
+        </div>
+        <div class="ov-item">
+          <div class="ov-dot"></div>
+          <div class="ov-text"><span class="ov-label">症状：</span>多数携带者无任何感觉，免疫力低下时可引起发热、局部感染等表现</div>
+        </div>
+        <div class="ov-item">
+          <div class="ov-dot"></div>
+          <div class="ov-text"><span class="ov-label">传染性：</span>可在人与人之间传播，孕妇携带时可在分娩过程中传给新生儿</div>
+        </div>
+        <div class="ov-item">
+          <div class="ov-dot"></div>
+          <div class="ov-text"><span class="ov-label">危害：</span>对新生儿危害最大，可引起败血症、脑膜炎，是新生儿严重感染的主要原因之一</div>
+        </div>
+      </div>
+
+      <div class="section-title" style="font-size:16px; margin-top:0; margin-bottom:10px;">B族链球菌是什么？</div>
+      <p class="body-text">B族链球菌（GBS），学名无乳链球菌，是一种革兰阳性球菌。它广泛存在于自然界，也是人体肠道和生殖道的正常定植菌之一——也就是说，很多健康人体内本来就有这种细菌，并不代表生病了。</p>
+      <p class="body-text">在免疫功能正常的成年人体内，B族链球菌通常"安分守己"，不引发任何症状。但在特定情况下，比如孕妇临产、新生儿出生、老年人或免疫力低下的人群中，它可能趁机大量繁殖，引发严重感染。</p>
+      <p class="body-text">B族链球菌对孕产妇和新生儿的威胁最受关注。孕妇阴道或直肠携带GBS时，分娩过程中细菌可能传给宝宝，导致新生儿出现败血症、肺炎或脑膜炎等危及生命的疾病。正因如此，国内外产科指南均建议孕妇在孕晚期进行GBS筛查。</p>
+    </div>
+
+    <!-- 版块二：感染途径 -->
+    <div class="panel" id="panel-route">
+      <h2 class="panel-title">感染途径</h2>
+
+      <div class="section-title">B族链球菌是通过什么途径传播的？</div>
+      <p class="body-text">B族链球菌的传播方式与其他常见细菌有所不同。由于它本身就是人体正常菌群的一部分，"感染"更多指的是细菌从定植状态转变为致病状态，或从一个人传给另一个人（尤其是从母亲传给新生儿）。</p>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">母婴垂直传播（最重要的传播途径）</div>
+          <div class="pl-item-desc">孕妇阴道或直肠携带GBS时，宝宝在经过产道出生的过程中会接触到细菌，可能引发新生儿早发型GBS病。这是新生儿感染GBS最主要的方式。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">自身菌群失衡（条件致病）</div>
+          <div class="pl-item-desc">本身携带GBS的人，在免疫力下降、手术、分娩等特殊情况下，原本"安静"的细菌可能大量繁殖，突破人体防线，引发感染。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">接触传播</div>
+          <div class="pl-item-desc">通过直接接触感染者的分泌物或受污染的物品，也可能发生传播，但在成年人之间这种情况相对少见。</div>
+        </div>
+      </div>
+
+      <div class="section-title">B族链球菌主要存在于哪里？</div>
+      <p class="body-text">B族链球菌主要定植在人体的消化道（肠道）和生殖泌尿道（阴道、直肠周围）。研究显示，约10%–30%的健康成年人（尤其是女性）体内携带GBS，但绝大多数人没有任何不适感。在中国，孕妇GBS定植率约为11.3%。</p>
+
+      <div class="section-title">哪些人更容易受到B族链球菌的影响？</div>
+      <div class="list-item"><div class="list-dot"></div><div>新生儿，尤其是早产儿（免疫系统尚未发育完全，抵抗力极弱）</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>孕妇（分娩时可能将细菌传给宝宝，自身也可能发生产后感染）</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>65岁以上老年人（免疫功能随年龄下降）</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>患有糖尿病、肝病、肾病、肿瘤等慢性病的人群</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>正在接受化疗、长期使用激素或免疫抑制剂的人群</div></div>
+    </div>
+
+    <!-- 版块三：感染症状 -->
+    <div class="panel" id="panel-symptom">
+      <h2 class="panel-title">感染症状</h2>
+
+      <div class="section-title">感染B族链球菌后的发病过程是怎样的？</div>
+      <p class="body-text">大多数携带GBS的成年人终身不会发病，细菌只是"住"在体内，不引发任何症状。只有在特定条件下（如免疫力下降、分娩、手术等），细菌才可能突破人体防线，引发感染。</p>
+      <p class="body-text">新生儿GBS感染分为两种类型：早发型（出生后7天内发病，通常在出生后24小时内出现症状，与分娩时接触母体细菌有关）和晚发型（出生后7天至3个月发病，来源更复杂，可能来自母乳、医院环境或社区接触）。</p>
+
+      <div class="section-title">感染B族链球菌后有哪些表现？</div>
+      <p class="body-text">不同人群感染后的表现差异很大：</p>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">健康成年人携带（最常见情况）</div>
+          <div class="pl-item-desc">完全没有任何症状，不知道自己携带，只有通过检测才能发现。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">孕产妇感染</div>
+          <div class="pl-item-desc">可能出现尿路感染（尿频、尿痛、尿急）、绒毛膜羊膜炎（发热、腹痛、胎心加快）、产后子宫内膜炎（产后发热、下腹痛、恶露异常）等。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">新生儿感染</div>
+          <div class="pl-item-desc">早期表现可能很不典型，包括：吃奶差、体温异常（发热或体温过低）、呼吸急促或呼吸困难、皮肤发黄、精神萎靡、哭声微弱。严重时可发展为败血症、肺炎或脑膜炎，危及生命。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">老年人或免疫力低下者感染</div>
+          <div class="pl-item-desc">可出现发热、寒战、局部红肿热痛（皮肤软组织感染）、关节肿痛，严重时可发展为败血症。</div>
+        </div>
+      </div>
+
+      <div class="section-title">什么情况下建议就医？</div>
+      <div class="list-item"><div class="list-dot"></div><div>新生儿出现吃奶差、体温异常、呼吸急促、皮肤发黄加重或精神萎靡，应立即就医，不要等待观察</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>孕妇出现发热（体温超过38°C）、腹痛加重或胎动异常，应立即就医</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>产后出现持续发热、下腹痛或恶露有异味，应尽快就医</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>老年人或免疫力低下者出现不明原因发热、寒战，应及时就医</div></div>
+    </div>
+
+    <!-- 版块四：相关疾病 -->
+    <div class="panel" id="panel-disease">
+      <h2 class="panel-title">相关疾病</h2>
+
+      <div class="notice-box">
+        注：本病原体为人体正常定植菌群，属于条件致病菌，感染不等于必然患病。仅在免疫力低下、菌群失衡、分娩等特定条件下，才可能引发相关疾病。
+      </div>
+
+      <div class="section-title">高关联疾病</div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">新生儿B族链球菌病</div>
+          <div class="pl-item-desc">包括新生儿败血症、新生儿肺炎、新生儿脑膜炎。是GBS最严重的相关疾病，早发型多在出生后24小时内发病，晚发型在出生后1周至3个月内发病。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">孕产妇GBS感染</div>
+          <div class="pl-item-desc">包括绒毛膜羊膜炎（胎膜感染）、产后子宫内膜炎、产后败血症。孕妇携带GBS是发生这些感染的重要风险因素。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">泌尿道感染</div>
+          <div class="pl-item-desc">GBS可引起孕妇尿路感染，表现为尿频、尿痛、尿急，严重时可上行引起肾盂肾炎。孕期GBS菌尿（尿液中检出GBS）是需要治疗的指征。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">成人侵袭性GBS感染</div>
+          <div class="pl-item-desc">主要见于老年人和免疫力低下人群，可引起败血症、皮肤软组织感染、骨关节炎、心内膜炎等，近年来发病率有上升趋势。</div>
+        </div>
+      </div>
+
+      <div class="section-title">偶见关联疾病</div>
+      <div class="list-item"><div class="list-dot"></div><div>成人GBS脑膜炎（罕见，主要见于免疫力极度低下者）</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>GBS相关流产或死胎（与孕期GBS感染有关，但因果关系尚在研究中）</div></div>
+    </div>
+
+    <!-- 版块五：检测方式 -->
+    <div class="panel" id="panel-test">
+      <h2 class="panel-title">检测方式</h2>
+
+      <div class="section-title">哪些检查可以确认是否感染？</div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">阴道直肠拭子培养（金标准）</div>
+          <div class="pl-item-desc">用棉签分别取阴道下段和直肠的分泌物，送实验室培养，是目前确认GBS定植状态最准确的方法。孕妇建议在孕35–37周进行，结果通常需要2–3天。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">尿液培养</div>
+          <div class="pl-item-desc">当怀疑GBS引起尿路感染时，通过尿液培养可以确认是否有GBS生长及其数量。孕期尿液中检出GBS（即使没有症状）也需要治疗。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">血液培养</div>
+          <div class="pl-item-desc">当怀疑GBS引起败血症时，通过抽血培养可以确认细菌是否进入血液。这是诊断侵袭性GBS感染的关键检查，新生儿疑似感染时必须做。</div>
+        </div>
+      </div>
+
+      <div class="section-title">哪些检查可以协助排查是否感染？</div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">核酸检测（PCR）</div>
+          <div class="pl-item-desc">通过检测样本中GBS的基因片段来判断是否存在细菌，速度比培养快（通常1–2小时出结果），适合临产时来不及等培养结果的紧急情况，但灵敏度略低于培养法。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">血常规 + C反应蛋白</div>
+          <div class="pl-item-desc">当怀疑感染时，血常规中白细胞升高、C反应蛋白升高可以提示体内有细菌感染，但无法确认是否为GBS，需结合培养结果综合判断。</div>
+        </div>
+      </div>
+
+      <div class="section-title">B族链球菌与哪些病原体感染类似，如何区分？</div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">与A族链球菌（化脓性链球菌）的区分</div>
+          <div class="pl-item-desc">A族链球菌更常引起咽炎、扁桃体炎、猩红热，而B族链球菌主要影响孕产妇和新生儿。两者都是链球菌，但致病部位和人群不同，通过培养和分型可以明确区分。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">与大肠杆菌的区分</div>
+          <div class="pl-item-desc">大肠杆菌也是新生儿败血症和脑膜炎的常见病因，临床表现与GBS感染相似，无法通过症状区分，必须依靠血液或脑脊液培养来确认病原体。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 版块六：防治手段 -->
+    <div class="panel" id="panel-prevent">
+      <h2 class="panel-title">防治手段</h2>
+
+      <div class="section-title">生活建议</div>
+      <div class="list-item"><div class="list-dot"></div><div>孕妇确认携带GBS后，不需要提前用药，按医生建议在临产时进行预防性用药即可，日常生活无需特殊限制</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>保持外阴清洁，避免过度冲洗阴道（过度冲洗反而会破坏正常菌群平衡）</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>孕期如出现尿频、尿痛等尿路感染症状，应及时就医，不要自行用药</div></div>
+
+      <div class="section-title">是否可以通过接种疫苗预防B族链球菌？</div>
+      <p class="body-text">目前尚无获批上市的GBS疫苗。多款针对孕妇的GBS疫苗正在全球范围内进行临床试验，其中部分已进入三期临床阶段，但截至目前尚未有产品完成审批上市。一旦疫苗上市，孕妇接种后可将抗体传给胎儿，有望从根本上降低新生儿GBS病的发生率。</p>
+
+      <div class="section-title">除了接种疫苗外还可以如何预防B族链球菌？</div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">孕晚期筛查（最重要的预防措施）</div>
+          <div class="pl-item-desc">建议所有孕妇在孕35–37周进行阴道直肠拭子GBS培养筛查。筛查结果阳性的孕妇，在临产或破水后应立即开始静脉注射抗生素（首选青霉素），可将新生儿早发型GBS病的发生率降低约80%。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">高危孕妇的预防性用药</div>
+          <div class="pl-item-desc">即使未做筛查或筛查结果未知，以下情况也应在临产时预防性使用抗生素：孕周不足37周早产、破水超过18小时、产时发热（体温超过38°C）、本次妊娠尿液中曾检出GBS、上一胎宝宝曾患GBS病。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">新生儿出生后的密切观察</div>
+          <div class="pl-item-desc">母亲携带GBS的新生儿出生后需要在医院观察至少48小时，密切监测体温、呼吸、吃奶情况，一旦出现异常立即处理。</div>
+        </div>
+      </div>
+
+      <div class="section-title">感染B族链球菌后是否需要治疗？如何治疗？</div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">什么情况下需要治疗</div>
+          <div class="pl-item-desc">健康成年人单纯携带GBS（无症状）通常不需要治疗。以下情况需要治疗：孕期尿液中检出GBS（即使无症状）；孕妇临产或破水时（预防性用药）；出现GBS引起的感染症状（尿路感染、绒毛膜羊膜炎、产后感染等）；新生儿疑似或确诊GBS感染；老年人或免疫力低下者出现侵袭性GBS感染。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">如何治疗</div>
+          <div class="pl-item-desc">GBS对青霉素高度敏感，青霉素是首选治疗药物。对青霉素过敏的患者，可根据药敏结果选用头孢菌素、克林霉素或万古霉素。新生儿GBS感染需要住院，静脉使用抗生素，疗程根据感染类型（败血症、肺炎或脑膜炎）有所不同，通常为10–21天。</div>
+        </div>
+      </div>
+
+      <div class="section-title">感染B族链球菌后是否可以治愈？治愈后会复发吗？</div>
+      <p class="body-text">GBS引起的感染性疾病（如尿路感染、产后感染、新生儿败血症等），在规范抗生素治疗后通常可以治愈，治愈率较高。</p>
+      <p class="body-text">需要注意的是，治愈感染并不等于清除了GBS定植。由于GBS是人体正常菌群的一部分，治疗结束后细菌可能再次定植于阴道或直肠，因此下次妊娠时仍需重新筛查，不能依赖上次的筛查结果。</p>
+      <p class="body-text">新生儿GBS脑膜炎即使治愈，也可能留下不同程度的神经系统后遗症（如听力损失、发育迟缓），因此早期发现、早期治疗至关重要。</p>
+
+      <!-- 参考文献 -->
+      <div class="refs-wrap">
+        <div class="refs-title">参考文献</div>
+        <ul class="refs-list" id="refs-list">
+          <li>[1] 中华医学会围产医学分会. 预防围产期B族链球菌病（中国）专家共识[J]. 中华围产医学杂志, 2021, 24(8): 561-566.</li>
+          <li>[2] Puopolo KM, et al. Management of Infants at Risk for Group B Streptococcal Disease. Pediatrics, 2019, 144(2): e20191881.</li>
+          <li>[3] Schrag SJ, et al. Prevention of Perinatal Group B Streptococcal Disease. MMWR Recomm Rep, 2010, 59(RR-10): 1-36.</li>
+          <li id="ref4" class="refs-hidden">[4] 中国疾病预防控制中心. B族链球菌感染防控指南（2022年版）.</li>
+          <li id="ref5" class="refs-hidden">[5] Seale AC, et al. Estimates of the Burden of Group B Streptococcal Disease Worldwide for Pregnant Women, Stillbirths, and Children. Clin Infect Dis, 2017, 65(suppl_2): S200-S219.</li>
+        </ul>
+        <span class="refs-toggle" id="refs-toggle" onclick="toggleRefs()">展开全部</span>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<script>
+  const tabs    = document.querySelectorAll('.tab');
+  const content = document.getElementById('content');
+  const panels  = document.querySelectorAll('.panel');
+  const tabsEl  = document.getElementById('tabs');
+
+  // 用于屏蔽点击后触发的 scroll 事件误判
+  let isClickScrolling = false;
+  let clickScrollTimer = null;
+
+  /* ── 点击 Tab：立即高亮 + 精准跳转 ── */
+  tabs.forEach((tab, idx) => {
+    tab.addEventListener('click', () => {
+      // ① 立即强制高亮
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      // ② 跳转：用 panel.offsetTop（相对 content）减去 Tab 栏高度
+      const target = panels[idx];
+      if (target) {
+        isClickScrolling = true;
+        clearTimeout(clickScrollTimer);
+        clickScrollTimer = setTimeout(() => { isClickScrolling = false; }, 800);
+
+        // flex+sticky 布局：.content 从 tabs 底部开始，offsetTop 已是纯内容偏移，直接使用
+        content.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+      }
+    });
+  });
+
+  /* ── 手动滑动：根据 scrollTop 判断当前所在版块并高亮 ── */
+  content.addEventListener('scroll', () => {
+    if (isClickScrolling) return;   // 点击触发的滚动不重新判断
+
+    const scrollTop = content.scrollTop;
+    const THRESHOLD  = 16;
+
+    let active = 0;
+    panels.forEach((p, i) => {
+      if (p.offsetTop - THRESHOLD <= scrollTop) active = i;
+    });
+
+    tabs.forEach((t, i) => t.classList.toggle('active', i === active));
+
+    // 激活的 Tab 滚入横向可视区
+    const activeTab = tabs[active];
+    if (activeTab) activeTab.scrollIntoView({ block: 'nearest', inline: 'center' });
+  });
+
+  function toggleRefs() {
+    const hidden = document.querySelectorAll('.refs-hidden');
+    const toggle = document.getElementById('refs-toggle');
+    const isHidden = hidden[0] && hidden[0].style.display !== 'list-item';
+    hidden.forEach(el => {
+      el.style.display = isHidden ? 'list-item' : 'none';
+    });
+    toggle.textContent = isHidden ? '收起内容' : '展开全部';
+  }
+</script>
+</body>
+</html>
