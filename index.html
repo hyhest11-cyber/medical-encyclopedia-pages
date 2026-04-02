@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>名词百科管理平台</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f7fa; color: #333; min-height: 100vh; }
+
+  /* 顶部导航 */
+  .topbar { background: linear-gradient(135deg, #1a73e8, #0d47a1); color: #fff; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 100; }
+  .topbar-title { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .topbar-title svg { width: 22px; height: 22px; }
+  .topbar-actions { display: flex; gap: 10px; }
+
+  /* 主体布局 */
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+  /* 面包屑 */
+  .breadcrumb { display: flex; align-items: center; gap: 6px; margin-bottom: 16px; font-size: 14px; flex-wrap: wrap; }
+  .breadcrumb a { color: #1a73e8; text-decoration: none; cursor: pointer; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .breadcrumb span { color: #999; }
+
+  /* 工具栏 */
+  .toolbar { background: #fff; border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .toolbar-left { display: flex; gap: 10px; flex: 1; flex-wrap: wrap; }
+
+  /* 按钮 */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 7px; border: none; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.15s; white-space: nowrap; }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: #1a73e8; color: #fff; }
+  .btn-primary:hover { background: #1557b0; }
+  .btn-success { background: #34a853; color: #fff; }
+  .btn-success:hover { background: #2d8f47; }
+  .btn-warning { background: #f9ab00; color: #fff; }
+  .btn-warning:hover { background: #e09600; }
+  .btn-danger { background: #ea4335; color: #fff; }
+  .btn-danger:hover { background: #c5221f; }
+  .btn-outline { background: #fff; color: #1a73e8; border: 1.5px solid #1a73e8; }
+  .btn-outline:hover { background: #e8f0fe; }
+  .btn-copy-all { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+  .btn-copy-all:hover { opacity: 0.9; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 5px; }
+
+  /* 文件列表 */
+  .file-list { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; }
+  .file-list-header { padding: 12px 18px; background: #f8f9fa; border-bottom: 1px solid #e8eaed; font-size: 12px; color: #888; display: flex; align-items: center; gap: 8px; }
+  .file-item { display: flex; align-items: center; padding: 12px 18px; border-bottom: 1px solid #f0f0f0; transition: background 0.1s; gap: 10px; }
+  .file-item:last-child { border-bottom: none; }
+  .file-item:hover { background: #f8f9ff; }
+  .file-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .file-icon.folder { background: #fff3e0; color: #f57c00; }
+  .file-icon.html { background: #e8f5e9; color: #2e7d32; }
+  .file-name { flex: 1; font-size: 14px; font-weight: 500; cursor: pointer; color: #333; }
+  .file-name:hover { color: #1a73e8; }
+  .file-name.folder-name { color: #1a73e8; }
+  .file-link { font-size: 12px; color: #999; margin-right: 8px; max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+  /* 空状态 */
+  .empty-state { text-align: center; padding: 60px 20px; color: #999; }
+  .empty-state svg { width: 64px; height: 64px; margin-bottom: 16px; opacity: 0.4; }
+  .empty-state p { font-size: 15px; }
+
+  /* 加载状态 */
+  .loading { text-align: center; padding: 40px; color: #888; }
+  .spinner { width: 32px; height: 32px; border: 3px solid #e0e0e0; border-top-color: #1a73e8; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* 模态框 */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .modal { background: #fff; border-radius: 14px; padding: 28px; width: 100%; max-width: 460px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .modal h3 { font-size: 17px; font-weight: 600; margin-bottom: 18px; color: #222; }
+  .modal label { display: block; font-size: 13px; color: #666; margin-bottom: 6px; margin-top: 14px; }
+  .modal input, .modal select { width: 100%; padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.15s; }
+  .modal input:focus, .modal select:focus { border-color: #1a73e8; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 22px; justify-content: flex-end; }
+  .modal-hint { font-size: 12px; color: #999; margin-top: 6px; }
+
+  /* Toast */
+  .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+  .toast { padding: 12px 18px; border-radius: 8px; color: #fff; font-size: 13px; font-weight: 500; box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: slideIn 0.25s ease; display: flex; align-items: center; gap: 8px; min-width: 200px; }
+  .toast.success { background: #34a853; }
+  .toast.error { background: #ea4335; }
+  .toast.info { background: #1a73e8; }
+  @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  /* 上传区域 */
+  .upload-zone { border: 2px dashed #c5cae9; border-radius: 10px; padding: 28px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fafbff; }
+  .upload-zone:hover, .upload-zone.drag-over { border-color: #1a73e8; background: #e8f0fe; }
+  .upload-zone p { color: #888; font-size: 13px; margin-top: 8px; }
+  .upload-zone .upload-icon { font-size: 36px; }
+  #fileInput { display: none; }
+
+  /* 统计栏 */
+  .stats-bar { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .stat-card { background: #fff; border-radius: 10px; padding: 14px 20px; flex: 1; min-width: 120px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .stat-card .num { font-size: 24px; font-weight: 700; color: #1a73e8; }
+  .stat-card .label { font-size: 12px; color: #888; margin-top: 2px; }
+
+  /* 配置区 */
+  .config-bar { background: #fff3e0; border: 1px solid #ffe0b2; border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .config-bar label { font-size: 13px; color: #e65100; font-weight: 500; }
+  .config-bar input { flex: 1; min-width: 200px; padding: 8px 12px; border: 1.5px solid #ffcc80; border-radius: 7px; font-size: 13px; outline: none; font-family: monospace; }
+  .config-bar input:focus { border-color: #f57c00; }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div class="topbar">
+  <div class="topbar-title">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+    名词百科管理平台
+  </div>
+  <div class="topbar-actions">
+    <a href="https://github.com/hyhest11-cyber/medical-encyclopedia-pages" target="_blank" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,0.5);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub 仓库
+    </a>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Token 配置 -->
+  <div class="config-bar" id="configBar">
+    <label>⚙️ GitHub Token（用于上传/删除操作）：</label>
+    <input type="password" id="tokenInput" placeholder="输入 GitHub Personal Access Token..." />
+    <button class="btn btn-warning" onclick="saveToken()">保存</button>
+    <button class="btn btn-outline" onclick="toggleTokenVisibility()">显示/隐藏</button>
+  </div>
+
+  <!-- 统计栏 -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="num" id="statFolders">-</div>
+      <div class="label">文件夹数</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="statFiles">-</div>
+      <div class="label">网页数</div>
+    </div>
+    <div class="stat-card" style="flex:2;">
+      <div class="num" style="font-size:14px;word-break:break-all;" id="statBase">https://hyhest11-cyber.github.io/medical-encyclopedia-pages/</div>
+      <div class="label">Pages 基础地址</div>
+    </div>
+  </div>
+
+  <!-- 面包屑 -->
+  <div class="breadcrumb" id="breadcrumb"></div>
+
+  <!-- 工具栏 -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <button class="btn btn-primary" onclick="showNewFolderModal()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2h-8l-2-2z"/></svg>
+        新建文件夹
+      </button>
+      <button class="btn btn-success" onclick="showUploadModal()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+        上传网页
+      </button>
+    </div>
+    <button class="btn btn-copy-all" onclick="copyAllLinks()" id="copyAllBtn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+      一键复制当前目录所有链接
+    </button>
+  </div>
+
+  <!-- 文件列表 -->
+  <div class="file-list" id="fileList">
+    <div class="loading">
+      <div class="spinner"></div>
+      <div>正在加载文件列表...</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast 容器 -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- 新建文件夹模态框 -->
+<div class="modal-overlay hidden" id="newFolderModal">
+  <div class="modal">
+    <h3>📁 新建文件夹</h3>
+    <label>文件夹名称</label>
+    <input type="text" id="newFolderName" placeholder="例如：妇科、皮肤科..." />
+    <div class="modal-hint">将在当前目录下创建文件夹。支持多级，可在新文件夹内继续创建子文件夹。</div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('newFolderModal')">取消</button>
+      <button class="btn btn-primary" onclick="createFolder()">创建</button>
+    </div>
+  </div>
+</div>
+
+<!-- 上传网页模态框 -->
+<div class="modal-overlay hidden" id="uploadModal">
+  <div class="modal">
+    <h3>⬆️ 上传网页</h3>
+    <label>选择 HTML 文件（可多选）</label>
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="handleDragLeave(event)">
+      <div class="upload-icon">📄</div>
+      <div style="font-weight:600;margin-top:8px;">点击选择或拖拽文件到此处</div>
+      <p>支持 .html 文件，可同时选择多个</p>
+    </div>
+    <input type="file" id="fileInput" accept=".html" multiple onchange="handleFileSelect(event)" />
+    <div id="selectedFiles" style="margin-top:12px;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('uploadModal')">取消</button>
+      <button class="btn btn-success" onclick="uploadFiles()" id="uploadBtn">上传</button>
+    </div>
+  </div>
+</div>
+
+<!-- 删除确认模态框 -->
+<div class="modal-overlay hidden" id="deleteModal">
+  <div class="modal">
+    <h3>🗑️ 确认删除</h3>
+    <p style="color:#666;font-size:14px;margin-top:8px;">确定要删除 <strong id="deleteFileName"></strong> 吗？此操作不可撤销。</p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('deleteModal')">取消</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">确认删除</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const OWNER = 'hyhest11-cyber';
+const REPO = 'medical-encyclopedia-pages';
+const PAGES_BASE = `https://${OWNER}.github.io/${REPO}/`;
+const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
+
+let currentPath = '';
+let currentItems = [];
+let deleteTarget = null;
+let pendingFiles = [];
+
+// ===== Token 管理 =====
+function getToken() {
+  return localStorage.getItem('gh_token') || '';
+}
+function saveToken() {
+  const t = document.getElementById('tokenInput').value.trim();
+  if (!t) { showToast('请输入 Token', 'error'); return; }
+  localStorage.setItem('gh_token', t);
+  showToast('Token 已保存', 'success');
+}
+function toggleTokenVisibility() {
+  const inp = document.getElementById('tokenInput');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+function initToken() {
+  const saved = getToken();
+  if (saved) {
+    document.getElementById('tokenInput').value = saved;
+  }
+}
+
+// ===== API 请求 =====
+async function apiGet(path) {
+  const url = `${API_BASE}${path ? '/' + path : ''}`;
+  const headers = { 'Accept': 'application/vnd.github.v3+json' };
+  if (getToken()) headers['Authorization'] = `token ${getToken()}`;
+  const res = await fetch(url, { headers });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function apiPut(path, content, sha) {
+  const token = getToken();
+  if (!token) { showToast('请先配置 GitHub Token', 'error'); throw new Error('no token'); }
+  const url = `${API_BASE}/${path}`;
+  const body = { message: `Upload ${path}`, content };
+  if (sha) body.sha = sha;
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) { const e = await res.json(); throw new Error(e.message || `HTTP ${res.status}`); }
+  return res.json();
+}
+
+async function apiDelete(path, sha) {
+  const token = getToken();
+  if (!token) { showToast('请先配置 GitHub Token', 'error'); throw new Error('no token'); }
+  const url = `${API_BASE}/${path}`;
+  const res = await fetch(url, {
+    method: 'DELETE',
+    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+    body: JSON.stringify({ message: `Delete ${path}`, sha })
+  });
+  if (!res.ok) { const e = await res.json(); throw new Error(e.message || `HTTP ${res.status}`); }
+  return res.json();
+}
+
+// ===== 加载文件列表 =====
+async function loadFiles(path) {
+  currentPath = path || '';
+  renderBreadcrumb();
+  const listEl = document.getElementById('fileList');
+  listEl.innerHTML = '<div class="loading"><div class="spinner"></div><div>正在加载...</div></div>';
+
+  try {
+    const items = await apiGet(currentPath);
+    currentItems = Array.isArray(items) ? items : [];
+    renderFileList();
+    updateStats();
+  } catch (e) {
+    listEl.innerHTML = `<div class="empty-state"><p>加载失败：${e.message}</p></div>`;
+  }
+}
+
+function renderFileList() {
+  const listEl = document.getElementById('fileList');
+  const folders = currentItems.filter(i => i.type === 'dir').sort((a,b) => a.name.localeCompare(b.name, 'zh'));
+  const files = currentItems.filter(i => i.type === 'file' && i.name.endsWith('.html')).sort((a,b) => a.name.localeCompare(b.name, 'zh'));
+
+  if (folders.length === 0 && files.length === 0) {
+    listEl.innerHTML = `<div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
+      <p>当前目录为空，点击上方按钮新建文件夹或上传网页</p>
+    </div>`;
+    return;
+  }
+
+  let html = `<div class="file-list-header">
+    <span>${folders.length} 个文件夹 &nbsp;·&nbsp; ${files.length} 个网页</span>
+  </div>`;
+
+  // 返回上级
+  if (currentPath) {
+    html += `<div class="file-item" onclick="goUp()" style="cursor:pointer;">
+      <div class="file-icon folder">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      </div>
+      <div class="file-name folder-name">.. 返回上级</div>
+    </div>`;
+  }
+
+  // 文件夹
+  folders.forEach(item => {
+    html += `<div class="file-item">
+      <div class="file-icon folder">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2h-8l-2-2z"/></svg>
+      </div>
+      <div class="file-name folder-name" onclick="loadFiles('${item.path}')">${item.name}</div>
+      <div class="file-actions">
+        <button class="btn btn-danger btn-sm" onclick="showDeleteFolderModal('${item.path}', '${item.name}')">删除</button>
+      </div>
+    </div>`;
+  });
+
+  // HTML 文件
+  files.forEach(item => {
+    const pageUrl = `${PAGES_BASE}${item.path}`;
+    html += `<div class="file-item">
+      <div class="file-icon html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+      </div>
+      <div class="file-name" onclick="window.open('${pageUrl}','_blank')">${item.name.replace('.html','')}</div>
+      <div class="file-link" title="${pageUrl}">${pageUrl}</div>
+      <div class="file-actions">
+        <button class="btn btn-outline btn-sm" onclick="copyLink('${pageUrl}', this)">复制链接</button>
+        <button class="btn btn-danger btn-sm" onclick="showDeleteModal('${item.path}', '${item.name}', '${item.sha}')">删除</button>
+      </div>
+    </div>`;
+  });
+
+  listEl.innerHTML = html;
+}
+
+function updateStats() {
+  const folders = currentItems.filter(i => i.type === 'dir').length;
+  const files = currentItems.filter(i => i.type === 'file' && i.name.endsWith('.html')).length;
+  document.getElementById('statFolders').textContent = folders;
+  document.getElementById('statFiles').textContent = files;
+}
+
+// ===== 面包屑 =====
+function renderBreadcrumb() {
+  const el = document.getElementById('breadcrumb');
+  const parts = currentPath ? currentPath.split('/') : [];
+  let html = `<a onclick="loadFiles('')">🏠 根目录</a>`;
+  let acc = '';
+  parts.forEach((p, i) => {
+    acc += (acc ? '/' : '') + p;
+    const path = acc;
+    html += `<span>›</span>`;
+    if (i === parts.length - 1) {
+      html += `<span style="color:#333;font-weight:500;">${p}</span>`;
+    } else {
+      html += `<a onclick="loadFiles('${path}')">${p}</a>`;
+    }
+  });
+  el.innerHTML = html;
+}
+
+function goUp() {
+  const parts = currentPath.split('/');
+  parts.pop();
+  loadFiles(parts.join('/'));
+}
+
+// ===== 新建文件夹 =====
+function showNewFolderModal() {
+  document.getElementById('newFolderName').value = '';
+  document.getElementById('newFolderModal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('newFolderName').focus(), 100);
+}
+
+async function createFolder() {
+  const name = document.getElementById('newFolderName').value.trim();
+  if (!name) { showToast('请输入文件夹名称', 'error'); return; }
+  if (/[\/\\:*?"<>|]/.test(name)) { showToast('文件夹名称包含非法字符', 'error'); return; }
+
+  const folderPath = currentPath ? `${currentPath}/${name}` : name;
+  const placeholderPath = `${folderPath}/.gitkeep`;
+
+  try {
+    const content = btoa('');
+    await apiPut(placeholderPath, content);
+    closeModal('newFolderModal');
+    showToast(`文件夹「${name}」创建成功`, 'success');
+    await loadFiles(currentPath);
+  } catch (e) {
+    showToast(`创建失败：${e.message}`, 'error');
+  }
+}
+
+// ===== 上传文件 =====
+function showUploadModal() {
+  pendingFiles = [];
+  document.getElementById('selectedFiles').innerHTML = '';
+  document.getElementById('fileInput').value = '';
+  document.getElementById('uploadModal').classList.remove('hidden');
+}
+
+function handleFileSelect(e) {
+  pendingFiles = Array.from(e.target.files);
+  renderSelectedFiles();
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.add('drag-over');
+}
+function handleDragLeave(e) {
+  document.getElementById('uploadZone').classList.remove('drag-over');
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('drag-over');
+  pendingFiles = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.html'));
+  renderSelectedFiles();
+}
+
+function renderSelectedFiles() {
+  const el = document.getElementById('selectedFiles');
+  if (pendingFiles.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div style="font-size:13px;color:#555;margin-bottom:6px;">已选择 ${pendingFiles.length} 个文件：</div>` +
+    pendingFiles.map(f => `<div style="font-size:12px;color:#888;padding:3px 0;">📄 ${f.name}</div>`).join('');
+}
+
+async function uploadFiles() {
+  if (pendingFiles.length === 0) { showToast('请先选择文件', 'error'); return; }
+  const btn = document.getElementById('uploadBtn');
+  btn.disabled = true;
+  btn.textContent = '上传中...';
+
+  let ok = 0, fail = 0;
+  for (const file of pendingFiles) {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);
+      let binary = '';
+      bytes.forEach(b => binary += String.fromCharCode(b));
+      const base64 = btoa(binary);
+      const filePath = currentPath ? `${currentPath}/${file.name}` : file.name;
+
+      // 检查是否已存在（获取sha）
+      let sha = null;
+      try {
+        const existing = await apiGet(filePath);
+        sha = existing.sha;
+      } catch(e) {}
+
+      await apiPut(filePath, base64, sha);
+      ok++;
+    } catch(e) {
+      fail++;
+      console.error(file.name, e);
+    }
+  }
+
+  btn.disabled = false;
+  btn.textContent = '上传';
+  closeModal('uploadModal');
+  showToast(`上传完成：${ok} 成功${fail > 0 ? `，${fail} 失败` : ''}`, ok > 0 ? 'success' : 'error');
+  await loadFiles(currentPath);
+}
+
+// ===== 删除 =====
+function showDeleteModal(path, name, sha) {
+  deleteTarget = { path, name, sha, type: 'file' };
+  document.getElementById('deleteFileName').textContent = name;
+  document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function showDeleteFolderModal(path, name) {
+  deleteTarget = { path, name, type: 'folder' };
+  document.getElementById('deleteFileName').textContent = `文件夹「${name}」及其所有内容`;
+  document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+async function confirmDelete() {
+  if (!deleteTarget) return;
+  closeModal('deleteModal');
+
+  try {
+    if (deleteTarget.type === 'file') {
+      await apiDelete(deleteTarget.path, deleteTarget.sha);
+      showToast(`「${deleteTarget.name}」已删除`, 'success');
+    } else {
+      // 删除文件夹：先获取所有文件再逐一删除
+      await deleteFolderRecursive(deleteTarget.path);
+      showToast(`文件夹「${deleteTarget.name}」已删除`, 'success');
+    }
+    await loadFiles(currentPath);
+  } catch(e) {
+    showToast(`删除失败：${e.message}`, 'error');
+  }
+  deleteTarget = null;
+}
+
+async function deleteFolderRecursive(path) {
+  const items = await apiGet(path);
+  for (const item of items) {
+    if (item.type === 'dir') {
+      await deleteFolderRecursive(item.path);
+    } else {
+      await apiDelete(item.path, item.sha);
+    }
+  }
+}
+
+// ===== 复制链接 =====
+function copyLink(url, btn) {
+  navigator.clipboard.writeText(url).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✓ 已复制';
+    btn.style.background = '#34a853';
+    btn.style.color = '#fff';
+    btn.style.borderColor = '#34a853';
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }, 1500);
+  }).catch(() => showToast('复制失败，请手动复制', 'error'));
+}
+
+function copyAllLinks() {
+  const files = currentItems.filter(i => i.type === 'file' && i.name.endsWith('.html'));
+  if (files.length === 0) { showToast('当前目录没有网页文件', 'info'); return; }
+  const links = files.map(i => `${PAGES_BASE}${i.path}`).join('\n');
+  navigator.clipboard.writeText(links).then(() => {
+    showToast(`已复制 ${files.length} 个链接`, 'success');
+  }).catch(() => showToast('复制失败', 'error'));
+}
+
+// ===== 工具函数 =====
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+}
+
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  const icons = { success: '✓', error: '✕', info: 'ℹ' };
+  toast.innerHTML = `<span>${icons[type] || 'ℹ'}</span><span>${msg}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+// 回车键支持
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    ['newFolderModal','uploadModal','deleteModal'].forEach(id => {
+      document.getElementById(id).classList.add('hidden');
+    });
+  }
+  if (e.key === 'Enter' && !document.getElementById('newFolderModal').classList.contains('hidden')) {
+    createFolder();
+  }
+});
+
+// ===== 初始化 =====
+initToken();
+loadFiles('');
+</script>
+</body>
+</html>
