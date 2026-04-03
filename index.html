@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -664,7 +664,10 @@ async function confirmDelete() {
       await deleteFolderRecursive(deleteTarget.path);
       showToast(`文件夹「${deleteTarget.name}」已删除`, 'success');
     }
-    await loadFiles(currentPath);
+    // 立即从本地列表移除，不等 GitHub API 缓存刷新
+    currentItems = currentItems.filter(i => i.path !== deleteTarget.path);
+    renderFileList(currentItems);
+    updateStats();
   } catch(e) {
     showToast(`删除失败：${e.message}`, 'error');
   }
@@ -741,3 +744,4 @@ loadFiles('');
 </script>
 </body>
 </html>
+
