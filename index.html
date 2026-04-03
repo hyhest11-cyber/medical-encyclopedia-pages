@@ -530,6 +530,7 @@ async function uploadFiles() {
   btn.textContent = '上传';
   closeModal('uploadModal');
   showToast(`上传完成：${ok} 成功${fail > 0 ? `，${fail} 失败` : ''}`, ok > 0 ? 'success' : 'error');
+  await new Promise(r => setTimeout(r, 1500));
   await loadFiles(currentPath);
 }
 
