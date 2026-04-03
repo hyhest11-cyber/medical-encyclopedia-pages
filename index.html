@@ -428,7 +428,11 @@ async function createFolder() {
     const fileContent = btoa('');
     let existingSha = null;
     try {
-      const checkResp = await fetch(`${API_BASE}/${encodeURIComponent(placeholderPath)}`, { headers: getHeaders() });
+      const encodedPath = placeholderPath.split('/').map(encodeURIComponent).join('/');
+      const token = getToken();
+      const checkResp = await fetch(`${API_BASE}/${encodedPath}`, {
+        headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+      });
       if (checkResp.ok) {
         const checkData = await checkResp.json();
         existingSha = checkData.sha;
