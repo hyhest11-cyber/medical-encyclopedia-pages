@@ -1,0 +1,597 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>甲状腺功能检查 - 美团买药·互联网医院</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+    background: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  .phone-wrap {
+    width: 100%;
+    max-width: 480px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    background: linear-gradient(160deg, #E0F7F5 0%, #F0FFFE 60%, #ffffff 100%);
+    padding: 12px 16px 16px;
+    flex-shrink: 0;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 10px;
+  }
+  .brand {
+    font-size: 13px;
+    color: var(--accent);
+    opacity: 0.75;
+    font-weight: 400;
+  }
+  .header-icons {
+    position: absolute;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .header-icons svg {
+    width: 20px;
+    height: 20px;
+    color: #999;
+    cursor: pointer;
+  }
+  .disease-name {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .meta-row {
+    font-size: 13px;
+    color: #1a1a1a;
+    line-height: 1.6;
+  }
+
+  /* ===== TAB BAR ===== */
+  .tab-bar {
+    height: 44px;
+    background: #fff;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-shrink: 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-item {
+    flex-shrink: 0;
+    padding: 0 16px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #999;
+    cursor: pointer;
+    position: relative;
+    white-space: nowrap;
+    transition: color 0.2s;
+  }
+  .tab-item.active {
+    color: #26A69A;
+    font-weight: 600;
+  }
+  .tab-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 16px;
+    right: 16px;
+    height: 2px;
+    background: #26A69A;
+    border-radius: 1px;
+  }
+
+  /* ===== CONTENT：自然滚动 ===== */
+  .content {
+    flex: 1;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .content::-webkit-scrollbar { display: none; }
+
+  .panel {
+    padding: 24px 16px 32px;
+    background: #fff;
+  }
+  .panel + .panel {
+    border-top: 8px solid #f7f8fa;
+  }
+
+  /* ===== 概述：速览小点 ===== */
+  .overview-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .overview-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #26A69A;
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+  .overview-text {
+    font-size: 13px;
+    color: #333;
+    line-height: 1.6;
+  }
+  .what-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+  .what-def {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.7;
+  }
+
+  /* ===== 通用版块样式 ===== */
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 14px;
+  }
+  .sub-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 18px 0 8px;
+  }
+  .sub-title:first-child { margin-top: 0; }
+  .body-text {
+    font-size: 15px;
+    line-height: 1.8;
+    color: #333;
+    margin-bottom: 10px;
+  }
+
+  /* ===== 适用人群表格 ===== */
+  .match-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .match-table th {
+    background: #E0F7F5;
+    color: #26A69A;
+    font-weight: 600;
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid #b2dfdb;
+  }
+  .match-table td {
+    padding: 10px 10px;
+    border-bottom: 1px solid #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+    vertical-align: top;
+  }
+  .match-table tr:last-child td { border-bottom: none; }
+
+  /* ===== 注意事项编号 ===== */
+  .notice-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    align-items: flex-start;
+  }
+  .notice-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #26A69A;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .notice-text {
+    font-size: 15px;
+    color: #333;
+    line-height: 1.75;
+  }
+
+  /* ===== 结果解读：指标卡片 ===== */
+  .indicator-block {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .indicator-block:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  .indicator-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #26A69A;
+    margin-bottom: 4px;
+  }
+  .indicator-range {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 8px;
+  }
+  .scene-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+    align-items: flex-start;
+  }
+  .scene-tag {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 8px;
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+  .scene-tag.high { background: #fce4ec; color: #c62828; }
+  .scene-tag.low  { background: #e8f5e9; color: #2e7d32; }
+  .scene-tag.note { background: #f3e5f5; color: #6a1b9a; }
+  .scene-text {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.7;
+  }
+  .compliance-note {
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.6;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  /* ===== 后续处理行动指引 ===== */
+  .action-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: flex-start;
+  }
+  .action-tag {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+  .action-tag.normal  { background: #e8f5e9; color: #388e3c; }
+  .action-tag.followup { background: #fff3e0; color: #e65100; }
+  .action-text {
+    font-size: 15px;
+    color: #333;
+    line-height: 1.75;
+  }
+
+  /* ===== 参考文献 ===== */
+  .ref-section {
+    margin-top: 28px;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f0;
+  }
+  .ref-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #bbb;
+    margin-bottom: 8px;
+  }
+  .ref-item {
+    font-size: 12px;
+    color: #ccc;
+    line-height: 1.6;
+    margin-bottom: 4px;
+  }
+  .ref-more { display: none; }
+  .ref-more.show { display: block; }
+  .ref-toggle {
+    font-size: 12px;
+    color: #26A69A;
+    cursor: pointer;
+    margin-top: 6px;
+    display: inline-block;
+  }
+</style>
+</head>
+<body>
+<div class="phone-wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <span class="brand">美团买药·互联网医院</span>
+      <div class="header-icons">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" onclick="window.parent.postMessage({ action: 'close' }, '*')" style="cursor:pointer"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </div>
+    </div>
+    <div class="disease-name">甲状腺功能检查</div>
+    <div class="meta-row">别称：甲功五项、甲功三项</div>
+    <div class="meta-row">检查科室：内分泌科</div>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar" id="tabBar">
+    <div class="tab-item active" data-idx="0">概述</div>
+    <div class="tab-item" data-idx="1">适用人群</div>
+    <div class="tab-item" data-idx="2">注意事项</div>
+    <div class="tab-item" data-idx="3">结果解读</div>
+    <div class="tab-item" data-idx="4">后续处理</div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content" id="sheetBody">
+
+    <!-- 版块 0：概述 -->
+    <div class="panel" id="panel-0">
+      <div class="overview-item">
+        <div class="overview-dot"></div>
+        <div class="overview-text">一次抽血同时检测多项甲状腺激素，全面了解甲状腺状态</div>
+      </div>
+      <div class="overview-item">
+        <div class="overview-dot"></div>
+        <div class="overview-text">不用空腹，到店即可做，出结果快</div>
+      </div>
+      <div class="overview-item">
+        <div class="overview-dot"></div>
+        <div class="overview-text">可发现甲亢、甲减等甲状腺问题</div>
+      </div>
+      <div class="overview-item">
+        <div class="overview-dot"></div>
+        <div class="overview-text">备孕、孕期及长期疲劳乏力人群的常用筛查项目</div>
+      </div>
+
+      <div class="what-title">甲状腺功能检查是什么？</div>
+      <div class="what-def">通过抽取静脉血，同时检测多项甲状腺相关激素的数值，用来判断甲状腺是否在正常工作，是发现甲亢、甲减等问题最常用的检查方式。</div>
+    </div>
+
+    <!-- 版块 1：适用人群 -->
+    <div class="panel" id="panel-1">
+      <div class="section-title">适用人群</div>
+      <table class="match-table">
+        <thead>
+          <tr>
+            <th style="width:46%">哪些人适合做</th>
+            <th>做这个检查能得到什么</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>长期感到莫名疲劳、怕冷、体重增加，怀疑甲状腺出了问题</td>
+            <td>判断是否存在甲减（甲状腺功能低下），找到疲劳乏力的原因</td>
+          </tr>
+          <tr>
+            <td>心跳加速、手抖、容易出汗、体重下降，怀疑甲亢</td>
+            <td>判断是否存在甲亢（甲状腺功能亢进），明确症状来源</td>
+          </tr>
+          <tr>
+            <td>备孕中或已怀孕，医生建议筛查甲状腺</td>
+            <td>排查甲状腺问题对怀孕和胎儿发育的影响，保障孕期安全</td>
+          </tr>
+          <tr>
+            <td>已确诊甲亢或甲减，正在服药，需要定期复查</td>
+            <td>监测治疗效果，判断药量是否需要调整</td>
+          </tr>
+          <tr>
+            <td>颈部有肿块或甲状腺结节，医生建议同步检查功能</td>
+            <td>了解结节是否影响了甲状腺的正常工作</td>
+          </tr>
+          <tr>
+            <td>体检套餐中包含甲功，或医生建议做常规筛查</td>
+            <td>了解甲状腺整体状态，排查潜在问题</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 版块 2：注意事项 -->
+    <div class="panel" id="panel-2">
+      <div class="section-title">注意事项</div>
+      <div class="notice-item">
+        <div class="notice-num">1</div>
+        <div class="notice-text"><strong>无需空腹</strong>，正常饮食后即可到店抽血，不影响检测结果。</div>
+      </div>
+      <div class="notice-item">
+        <div class="notice-num">2</div>
+        <div class="notice-text">若正在服用甲状腺相关药物（如优甲乐、甲巯咪唑），建议<strong>服药前</strong>抽血，或提前告知医生，避免影响结果判读。</div>
+      </div>
+      <div class="notice-item">
+        <div class="notice-num">3</div>
+        <div class="notice-text">近期服用含碘药物或大量食用海带、紫菜等高碘食物，可能对部分指标有影响，建议提前告知医生。</div>
+      </div>
+    </div>
+
+    <!-- 版块 3：结果解读 -->
+    <div class="panel" id="panel-3">
+      <div class="section-title">结果解读</div>
+      <div class="body-text" style="font-size:14px;color:#888;margin-bottom:20px;">甲功报告通常包含多个指标，每个指标的数值高低反映的是甲状腺不同方面的工作状态，需要结合起来理解，不能单看一项。</div>
+
+      <!-- TSH -->
+      <div class="indicator-block">
+        <div class="indicator-name">TSH（促甲状腺激素）— 最核心的指标</div>
+        <div class="indicator-range">参考范围：约 0.27–4.2 mIU/L（各医院略有差异）</div>
+        <div class="scene-row">
+          <div class="scene-tag high">数值偏高</div>
+          <div class="scene-text">提示甲状腺工作不够努力，大脑在催促它多干活，常见于甲减或甲状腺功能减退早期，需医生结合其他指标综合判断。</div>
+        </div>
+        <div class="scene-row">
+          <div class="scene-tag low">数值偏低</div>
+          <div class="scene-text">提示甲状腺工作过于活跃，大脑已经在踩刹车，常见于甲亢，需医生结合症状和其他指标综合评估。</div>
+        </div>
+      </div>
+
+      <!-- FT4 -->
+      <div class="indicator-block">
+        <div class="indicator-name">FT4（游离甲状腺素）</div>
+        <div class="indicator-range">参考范围：约 12–22 pmol/L（各医院略有差异）</div>
+        <div class="scene-row">
+          <div class="scene-tag high">数值偏高</div>
+          <div class="scene-text">甲状腺分泌的激素偏多，结合 TSH 偏低，通常提示甲亢，需医生进一步评估。</div>
+        </div>
+        <div class="scene-row">
+          <div class="scene-tag low">数值偏低</div>
+          <div class="scene-text">甲状腺分泌的激素偏少，结合 TSH 偏高，通常提示甲减，需医生进一步评估。</div>
+        </div>
+      </div>
+
+      <!-- FT3 -->
+      <div class="indicator-block">
+        <div class="indicator-name">FT3（游离三碘甲腺原氨酸）</div>
+        <div class="indicator-range">参考范围：约 3.1–6.8 pmol/L（各医院略有差异）</div>
+        <div class="scene-row">
+          <div class="scene-tag note">怎么看</div>
+          <div class="scene-text">FT3 是甲状腺激素中活性最强的一种，通常与 FT4 一起看。FT3 明显升高时，甲亢症状往往更明显；FT3 单独偏低有时见于重病或营养不良，需医生结合整体情况判断。</div>
+        </div>
+      </div>
+
+      <!-- 孕期特别说明 -->
+      <div class="indicator-block">
+        <div class="indicator-name">孕期参考范围有所不同</div>
+        <div class="scene-row">
+          <div class="scene-tag note">注意</div>
+          <div class="scene-text">怀孕后甲状腺激素的正常范围与普通人不同，孕早期 TSH 正常上限更低（约 2.5 mIU/L），不能用普通参考范围来判断，需以就诊医院的孕期专用参考范围为准。</div>
+        </div>
+      </div>
+
+      <div class="compliance-note">
+        不同医院的检测试剂和设备不同，参考范围会略有差异，最终以就诊医院报告单和医生解读为准。
+      </div>
+    </div>
+
+    <!-- 版块 4：后续处理（含参考文献） -->
+    <div class="panel" id="panel-4">
+      <div class="section-title">后续处理</div>
+
+      <div class="sub-title">检查后注意事项</div>
+      <div class="body-text">抽血后按压针眼 3–5 分钟止血，当天饮食、运动均不受影响，无需特殊护理。</div>
+
+      <div class="sub-title">结果出来后怎么做</div>
+      <div class="action-item">
+        <div class="action-tag normal">各项在范围内</div>
+        <div class="action-text">甲状腺功能目前正常，若无不适症状，无需额外处理；有症状但指标正常，建议前往内分泌科就诊进一步排查。</div>
+      </div>
+      <div class="action-item">
+        <div class="action-tag followup">TSH 或 FT4 偏离范围</div>
+        <div class="action-text">建议及时前往内分泌科就诊，由医生结合症状和其他检查综合判断，制定下一步方案，不建议自行对照网上资料下结论。</div>
+      </div>
+      <div class="action-item">
+        <div class="action-tag followup">已在服药，复查结果有变化</div>
+        <div class="action-text">带上报告前往就诊医院复诊，由医生判断是否需要调整药量，不要自行增减药物。</div>
+      </div>
+
+      <!-- 参考文献 -->
+      <div class="ref-section">
+        <div class="ref-title">参考文献</div>
+        <div class="ref-item">[1] 中华医学会内分泌学分会. 甲状腺功能减退症诊治指南（2017版）.</div>
+        <div class="ref-item">[2] 中国甲状腺疾病诊治指南——甲状腺功能亢进症. 中华内科杂志, 2007.</div>
+        <div class="ref-item">[3] 中国妊娠和产后甲状腺疾病诊治指南（第2版）. 中华内分泌代谢杂志, 2019.</div>
+        <div id="refMore" class="ref-more">
+          <div class="ref-item">[4] UpToDate. Thyroid function tests. 2024.</div>
+        </div>
+        <span class="ref-toggle" id="refToggle" onclick="toggleRef()">展开全部</span>
+      </div>
+    </div>
+
+  </div><!-- end .content -->
+
+</div><!-- end .phone-wrap -->
+
+<script>
+  const tabs = document.querySelectorAll('.tab-item');
+  const panels = document.querySelectorAll('.panel');
+  const sheetBody = document.getElementById('sheetBody');
+  const tabBar = document.getElementById('tabBar');
+
+  // Tab 点击 → 平滑滚动到对应版块顶部
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => {
+      panels[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // 滚动时：哪个 panel 顶部最后一个滚过屏幕中点，就高亮对应 Tab
+  sheetBody.addEventListener('scroll', () => {
+    const containerRect = sheetBody.getBoundingClientRect();
+    const centerY = containerRect.top + containerRect.height / 2;
+    let active = 0;
+    panels.forEach((p, i) => {
+      const rect = p.getBoundingClientRect();
+      if (rect.top <= centerY) active = i;
+    });
+    tabs.forEach((t, i) => t.classList.toggle('active', i === active));
+
+    // 让激活的 Tab 滚入可视区
+    const activeTab = tabs[active];
+    const tabRect = activeTab.getBoundingClientRect();
+    const barRect = tabBar.getBoundingClientRect();
+    if (tabRect.left < barRect.left) {
+      tabBar.scrollLeft -= barRect.left - tabRect.left + 16;
+    } else if (tabRect.right > barRect.right) {
+      tabBar.scrollLeft += tabRect.right - barRect.right + 16;
+    }
+  }, { passive: true });
+
+  // 参考文献展开/收起
+  function toggleRef() {
+    const more = document.getElementById('refMore');
+    const btn = document.getElementById('refToggle');
+    if (more.classList.contains('show')) {
+      more.classList.remove('show');
+      btn.textContent = '展开全部';
+    } else {
+      more.classList.add('show');
+      btn.textContent = '收起内容';
+    }
+  }
+</script>
+</body>
+</html>
