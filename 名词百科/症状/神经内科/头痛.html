@@ -1,0 +1,478 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>头痛 - 健康百科</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --accent: #26A69A;
+  --accent-light: #E0F7F5;
+  --header-bg: linear-gradient(160deg, #E0F7F5 0%, #F0FFFE 60%, #ffffff 100%);
+  --text: #1a1a1a;
+  --text-sub: #999;
+  --text-body: #333;
+  --border: #efefef;
+  --header-h: 148px;
+  --tab-h: 44px;
+}
+
+html, body {
+  height: 100%; overflow: hidden; background: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+.page-wrap { max-width: 480px; margin: 0 auto; height: 100vh; position: relative; overflow: hidden; background: #fff; }
+
+/* ── Header ── */
+.header {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: var(--header-h);
+  background: var(--header-bg);
+  z-index: 100;
+  padding: 0 16px 18px;
+  display: flex; flex-direction: column; justify-content: flex-end;
+}
+.header-nav {
+  position: absolute; top: 14px; left: 16px; right: 16px;
+  display: flex; justify-content: center; align-items: center;
+}
+.header-brand-center {
+  flex: 1; text-align: center;
+  font-size: 13px; color: var(--accent); opacity: 0.75; font-weight: 400;
+  pointer-events: none;
+}
+.header-nav-right {
+  position: absolute; right: 0; display: flex; align-items: center;
+}
+.nav-btn {
+  width: 32px; height: 32px; display: flex; align-items: center;
+  justify-content: center; cursor: pointer; color: #666; border-radius: 50%;
+}
+.nav-btn:active { background: rgba(0,0,0,0.06); }
+.header-title { font-size: 28px; font-weight: 700; color: var(--text); line-height: 1.2; margin-bottom: 5px; }
+.header-meta { font-size: 13px; color: #1a1a1a; line-height: 1.8; }
+
+/* ── Tabs ── */
+.tabs {
+  position: absolute; top: var(--header-h); left: 0; right: 0;
+  height: var(--tab-h); background: #fff;
+  border-bottom: 1px solid var(--border);
+  display: flex; overflow-x: auto; z-index: 99;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex: 0 0 auto; padding: 0 16px; height: 100%;
+  display: flex; align-items: center;
+  font-size: 14px; color: var(--text-sub);
+  cursor: pointer; white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color .2s, border-color .2s;
+}
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+/* ── Content ── */
+.content {
+  position: absolute;
+  top: calc(var(--header-h) + var(--tab-h));
+  left: 0; right: 0; bottom: 0;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Panel ── */
+.panel {
+  background: #fff;
+  padding: 22px 16px 40px;
+}
+
+/* ── 概述小圆点列表 ── */
+.ov-list { margin-bottom: 24px; }
+.ov-item { display: flex; gap: 8px; margin-bottom: 8px; align-items: flex-start; }
+.ov-item:last-child { margin-bottom: 0; }
+.ov-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 7px; }
+.ov-content { font-size: 13px; line-height: 1.6; color: var(--text-body); }
+.ov-label { font-size: 12px; font-weight: 700; color: var(--accent); }
+
+/* ── 版块小节标题 ── */
+.sec-title { font-size: 17px; font-weight: 700; color: var(--text); margin: 26px 0 12px; }
+.sec-title:first-child { margin-top: 0; }
+.def-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 14px; padding-top: 4px; }
+
+/* ── 正文 ── */
+.body-p { font-size: 15px; line-height: 1.8; color: var(--text-body); margin-bottom: 10px; }
+.body-p:last-child { margin-bottom: 0; }
+
+/* ── 普通列表 ── */
+.pl-item { display: flex; gap: 10px; font-size: 15px; line-height: 1.75; color: var(--text-body); margin-bottom: 10px; align-items: flex-start; }
+.pl-item:last-child { margin-bottom: 0; }
+.pl-dot { width: 5px; height: 5px; border-radius: 50%; background: #bbb; flex-shrink: 0; margin-top: 9px; }
+.pl-dot-accent { background: var(--accent); }
+.pl-dot-green { background: #66bb6a; }
+.pl-dot-warn { background: #ffb300; }
+.pl-dot-red { background: #ef5350; }
+
+/* ── 程度分级卡片 ── */
+.level-card { border-radius: 12px; padding: 14px 14px; margin-bottom: 12px; }
+.level-card:last-child { margin-bottom: 0; }
+.level-card.normal { background: #f0faf0; border-left: 3px solid #66bb6a; }
+.level-card.watch  { background: #fffbf0; border-left: 3px solid #ffb300; }
+.level-card.urgent { background: #fff3f3; border-left: 3px solid #ef5350; }
+.level-label { font-size: 12px; font-weight: 700; margin-bottom: 5px; }
+.level-card.normal .level-label { color: #388e3c; }
+.level-card.watch  .level-label { color: #f57c00; }
+.level-card.urgent .level-label { color: #c62828; }
+.level-desc { font-size: 14px; line-height: 1.7; color: var(--text-body); }
+
+/* ── 警告条 ── */
+.warn-bar { border-left: 3px solid #ef5350; background: #fff3f3; padding: 11px 13px; font-size: 14px; line-height: 1.7; color: #5d1a1a; margin: 16px 0; }
+.warn-bar-yellow { border-left: 3px solid #ffb300; background: #fffbf0; padding: 11px 13px; font-size: 14px; line-height: 1.7; color: #5d4037; margin: 16px 0; }
+
+/* ── 表格 ── */
+.tbl-wrap { overflow-x: auto; margin-bottom: 16px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--accent-light); color: var(--accent); font-weight: 600; padding: 9px 10px; text-align: left; border-bottom: 1px solid #b2dfdb; }
+td { padding: 10px; border-bottom: 1px solid #f5f5f5; color: var(--text-body); line-height: 1.55; vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+
+/* ── 带标题列表项 ── */
+.entry-item { padding: 14px 0 14px 14px; border-left: 3px solid var(--accent); margin-bottom: 12px; }
+.entry-item:last-child { margin-bottom: 0; }
+.entry-name { font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 5px; line-height: 1.4; }
+.entry-desc { font-size: 14px; color: #555; line-height: 1.7; }
+
+/* ── 参考文献 ── */
+.refs-panel { background: #fff; padding: 20px 16px 60px; }
+.refs-label { font-size: 13px; font-weight: 600; color: #888; margin-bottom: 10px; }
+.ref-item { font-size: 12px; color: #888; line-height: 1.6; padding: 6px 0; border-bottom: 1px solid #f5f5f5; }
+.ref-item:last-child { border-bottom: none; }
+.refs-more { display: none; }
+.refs-more.open { display: block; }
+.refs-toggle { font-size: 12px; color: var(--accent); cursor: pointer; margin-top: 8px; display: inline-block; }
+
+/* ── 分隔线 ── */
+.divider { height: 1px; background: #f5f5f5; margin: 20px 0; }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-nav">
+      <div class="header-brand-center">美团买药·互联网医院</div>
+      <div class="header-nav-right">
+        <div class="nav-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </svg>
+        </div>
+        <div class="nav-btn" onclick="window.parent.postMessage({ action: 'close' }, '*')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="header-title">头痛</div>
+    <div class="header-meta">别称：头疼</div>
+    <div class="header-meta">相关科室：神经内科</div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-idx="0">概述</div>
+    <div class="tab" data-idx="1">病因</div>
+    <div class="tab" data-idx="2">症状</div>
+    <div class="tab" data-idx="3">就医</div>
+    <div class="tab" data-idx="4">治疗</div>
+    <div class="tab" data-idx="5">预后</div>
+    <div class="tab" data-idx="6">日常</div>
+  </div>
+
+  <!-- Content -->
+  <div class="content" id="content">
+
+    <!-- ══ 0. 概述 ══ -->
+    <div class="panel" id="panel-0">
+      <div class="ov-list">
+        <div class="ov-item">
+          <div class="ov-dot"></div>
+          <div class="ov-content"><span class="ov-label">定义：</span>偶发可自行缓解属正常；每月超 4 次或止痛药无效需关注。</div>
+        </div>
+        <div class="ov-item">
+          <div class="ov-dot"></div>
+          <div class="ov-content"><span class="ov-label">病因：</span>多由疲劳、紧张性头痛或偏头痛引起，少数由疾病导致。</div>
+        </div>
+        <div class="ov-item">
+          <div class="ov-dot"></div>
+          <div class="ov-content"><span class="ov-label">治疗：</span>取决于病因，紧张性头痛可用止痛药，偏头痛需专项管理。</div>
+        </div>
+      </div>
+
+      <div class="def-title">头痛是什么？</div>
+      <div class="body-p">头痛是头部任何部位出现的疼痛感，是最常见的身体不适之一。它本身不是一种独立的疾病，而是很多不同原因都可能引起的症状。</div>
+      <div class="body-p">绝大多数头痛是良性的，不会有严重后果。但少数头痛背后可能有需要处理的疾病，学会判断「这次头痛是否需要去看医生」是最重要的事。</div>
+    </div>
+
+    <!-- ══ 1. 病因 ══ -->
+    <div class="panel" id="panel-1">
+      <div class="body-p">头痛的原因很多，从最常见的紧张疲劳，到需要认真对待的疾病都有可能。先了解背后可能是什么，有助于你判断自己的情况。</div>
+
+      <div class="sec-title">生理性原因（正常情况，不需要担心）</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-green"></div><div><strong>疲劳和睡眠不足：</strong>熬夜、睡眠质量差后出现的头痛，休息后通常会自行缓解。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-green"></div><div><strong>脱水：</strong>喝水太少、出汗多后出现的头痛，补水后一般很快好转。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-green"></div><div><strong>长时间盯屏幕或保持同一姿势：</strong>颈肩肌肉紧张引起的头痛，活动一下、休息后会缓解。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-green"></div><div><strong>饥饿：</strong>血糖偏低时容易头痛，吃东西后通常会好转。</div></div>
+
+      <div class="sec-title">可能的背后疾病（按常见程度排列）</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>紧张性头痛：</strong>头部两侧或整个头有压迫感、箍紧感，不会跳痛，通常不伴随恶心，是最常见的头痛类型，压力大、久坐时容易发作。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>偏头痛：</strong>多为一侧头部跳痛，程度较重，可能伴随恶心、怕光、怕声音，发作时难以正常工作，部分人发作前会有视觉闪光或视野缺损的预兆。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>颈源性头痛：</strong>颈椎问题引起的头痛，疼痛从颈部或后脑勺向头顶蔓延，长时间低头或颈部姿势不良后加重。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>高血压：</strong>血压明显升高时可能引起后脑勺或全头的胀痛，常在早晨起床时明显，可能同时有头晕、耳鸣。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>鼻窦炎：</strong>额头、眼眶周围或颧骨处有压痛感，弯腰低头时加重，通常伴随鼻塞、流脓鼻涕。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>丛集性头痛：</strong>一侧眼眶周围极度剧烈的疼痛，每次持续 15 分钟到 3 小时，可能同时出现眼睛发红、流泪、鼻塞，发作期间会密集出现，相对少见但疼痛程度很重。</div></div>
+
+      <div class="sec-title">哪些人更容易头痛</div>
+      <div class="pl-item"><div class="pl-dot"></div><div>长期处于高压状态、睡眠质量差的人</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>有偏头痛家族史的人（偏头痛有明显遗传倾向）</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>长时间使用电脑、手机，颈肩长期紧张的人</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>女性在月经前后（激素波动容易诱发偏头痛）</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>有高血压但控制不稳定的人</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>经常服用止痛药的人（止痛药用多了反而会引起「药物过度使用性头痛」）</div></div>
+    </div>
+
+    <!-- ══ 2. 症状 ══ -->
+    <div class="panel" id="panel-2">
+      <div class="body-p">头痛本身就是症状，这里帮你判断「我这次头痛是轻是重、需不需要担心」。</div>
+
+      <div class="sec-title">程度判断</div>
+
+      <div class="level-card normal">
+        <div class="level-label">✓ 正常范围，可以先观察</div>
+        <div class="level-desc">偶尔出现，休息、喝水或睡一觉后能自行缓解；疼痛程度不影响正常工作和生活；没有伴随其他不舒服的感觉。</div>
+      </div>
+
+      <div class="level-card watch">
+        <div class="level-label">△ 需要关注，建议记录并就医</div>
+        <div class="level-desc">每月发作 4 次以上；每次持续超过 4 小时；止痛药能缓解但需要频繁服用（每周超过 2～3 次）；疼痛影响到正常上班、上学或日常活动。</div>
+      </div>
+
+      <div class="level-card urgent">
+        <div class="level-label">✕ 需要尽快就医</div>
+        <div class="level-desc">突然出现「一生中最严重的头痛」；止痛药完全没有效果；伴随发烧、脖子僵硬、怕光；伴随手脚无力、说话困难、视力突然变化；头部受伤后出现头痛；50 岁以后首次出现的新型头痛。</div>
+      </div>
+
+      <div class="sec-title">不同类型头痛的感觉对照</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>头痛类型</th><th>典型感觉</th></tr>
+          <tr><td>紧张性头痛</td><td>两侧或整头有压迫感、箍紧感，不跳痛，程度轻到中等</td></tr>
+          <tr><td>偏头痛</td><td>一侧跳痛，程度较重，可能恶心、怕光怕声</td></tr>
+          <tr><td>颈源性头痛</td><td>从后脑勺或颈部向头顶蔓延，低头久了加重</td></tr>
+          <tr><td>鼻窦炎头痛</td><td>额头或眼眶周围有压痛，弯腰时加重，伴鼻塞</td></tr>
+          <tr><td>高血压头痛</td><td>后脑勺胀痛，早晨明显，可能伴头晕</td></tr>
+        </table>
+      </div>
+
+      <div class="warn-bar">突然出现「这辈子最严重的头痛」，或头痛伴随发烧、脖子僵硬、手脚无力，需要立即就医，不要等待观察。</div>
+    </div>
+
+    <!-- ══ 3. 就医 ══ -->
+    <div class="panel" id="panel-3">
+
+      <div class="sec-title" style="margin-top:0;">可以先观察、不用急着去看医生的情况</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-green"></div><div>头痛偶尔出现，休息、喝水或睡觉后能自行缓解</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-green"></div><div>疼痛程度不影响正常生活，不需要吃止痛药</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-green"></div><div>能明确找到诱因（如熬夜、脱水、长时间盯屏幕），避开诱因后不再发作</div></div>
+
+      <div class="sec-title">建议去看医生（不紧急，但需要处理）</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>每月头痛发作 4 次以上，或每次持续超过 4 小时</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>止痛药有效，但每周需要吃 2～3 次以上才能撑过去</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>头痛影响到正常上班、上学，需要请假或卧床</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>头痛规律发生在月经前后，且程度较重</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>头痛同时伴随颈肩酸痛，低头久了明显加重</div></div>
+
+      <div class="sec-title">需要尽快就医（48 小时内）</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-warn"></div><div>止痛药完全没有效果，或需要越来越大的剂量才有用</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-warn"></div><div>头痛越来越频繁，近几周明显加重</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-warn"></div><div>50 岁以后第一次出现这种类型的头痛</div></div>
+
+      <div class="warn-bar">以下情况需要立即就医或拨打急救电话：突然出现「这辈子最严重的头痛」、头痛伴随发烧和脖子僵硬、伴随手脚无力或说话困难、头部受伤后出现头痛。这些可能是脑出血、脑膜炎等严重情况的信号。</div>
+
+      <div class="sec-title">去哪个科</div>
+      <div class="body-p">挂<strong>神经内科</strong>。如果头痛伴随明显鼻塞、流脓鼻涕，可以先看耳鼻喉科；如果血压高，可以同时看心内科或全科。</div>
+
+      <div class="sec-title">去看医生前可以准备什么</div>
+      <div class="body-p">提前记录头痛的规律，这是就诊时最有用的信息：</div>
+      <div class="pl-item"><div class="pl-dot"></div><div>每次头痛发作的时间和持续时长</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>疼痛的位置（一侧、两侧、后脑勺、额头）和感觉（跳痛、压迫感、胀痛）</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>疼痛程度（1～10 分，10 分是最痛）</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>有没有伴随恶心、怕光、怕声音、视觉变化</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>发作前有没有诱因（熬夜、压力大、月经、特定食物）</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div>吃了什么止痛药、效果怎么样</div></div>
+
+      <div class="sec-title">医生通常会做哪些检查</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>检查项目</th><th>用来看什么</th></tr>
+          <tr><td>血压测量</td><td>排查高血压引起的头痛</td></tr>
+          <tr><td>神经系统检查</td><td>检查手脚力量、反射、协调性，排查神经系统问题</td></tr>
+          <tr><td>头颅 CT 或 MRI</td><td>排查脑出血、脑肿瘤、脑梗等器质性病变（不是每个人都需要）</td></tr>
+          <tr><td>颈椎 X 光或 MRI</td><td>怀疑颈源性头痛时检查颈椎情况</td></tr>
+          <tr><td>血常规、血糖</td><td>排查贫血、低血糖等全身性原因</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ 4. 治疗 ══ -->
+    <div class="panel" id="panel-4">
+      <div class="body-p">头痛没有统一的治疗方案，治疗方向完全取决于背后的原因。同样是头痛，紧张性头痛和偏头痛的处理方式就完全不同，需要先搞清楚是哪种类型。</div>
+
+      <div class="sec-title">不同原因的处理方向</div>
+      <div class="entry-item">
+        <div class="entry-name">紧张性头痛</div>
+        <div class="entry-desc">布洛芬、对乙酰氨基酚等非处方止痛药通常有效；同时需要改善诱因，如减少久坐、调整颈肩姿势、缓解压力。频繁发作时医生可能会开预防性药物。</div>
+      </div>
+      <div class="entry-item">
+        <div class="entry-name">偏头痛</div>
+        <div class="entry-desc">发作时可用曲普坦类药物（需要医生处方）或非处方止痛药；每月发作 4 次以上时，医生会考虑开预防性药物（如普萘洛尔、托吡酯）来减少发作频率。</div>
+      </div>
+      <div class="entry-item">
+        <div class="entry-name">颈源性头痛</div>
+        <div class="entry-desc">针对颈椎问题处理，可能包括物理治疗、颈部肌肉放松、改善坐姿；严重时医生会考虑神经阻滞注射。</div>
+      </div>
+      <div class="entry-item">
+        <div class="entry-name">高血压引起的头痛</div>
+        <div class="entry-desc">控制血压是根本，血压稳定后头痛通常会消失；需要在医生指导下用降压药，不能自行停药。</div>
+      </div>
+      <div class="entry-item">
+        <div class="entry-name">鼻窦炎引起的头痛</div>
+        <div class="entry-desc">治疗鼻窦炎本身，可能包括抗生素、鼻腔冲洗、减充血剂；鼻窦炎好了，头痛自然消失。</div>
+      </div>
+
+      <div class="sec-title">自行缓解的方法（适用于轻度头痛）</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-green"></div><div><strong>休息和睡眠：</strong>在安静、黑暗的环境中休息，对紧张性头痛和偏头痛都有帮助。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-green"></div><div><strong>补水：</strong>如果头痛可能与脱水有关，喝 1～2 杯水，等 20 分钟看是否缓解。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-green"></div><div><strong>热敷或冷敷：</strong>紧张性头痛用热毛巾敷颈肩有帮助；偏头痛发作时冷敷额头可能更舒服。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-green"></div><div><strong>按摩太阳穴和颈肩：</strong>对紧张性头痛有一定缓解效果。</div></div>
+
+      <div class="warn-bar-yellow">止痛药每周服用超过 3 次，持续超过 3 个月，可能引起「药物过度使用性头痛」——头痛反而会越来越频繁。如果发现自己越来越依赖止痛药，需要去看医生。</div>
+    </div>
+
+    <!-- ══ 5. 预后 ══ -->
+    <div class="panel" id="panel-5">
+
+      <div class="sec-title" style="margin-top:0;">可能自行好转的情况</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-green"></div><div><strong>疲劳、脱水、饥饿引起的头痛：</strong>消除诱因后通常很快好转，不会留下后遗症。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-green"></div><div><strong>紧张性头痛：</strong>改善生活方式（减少久坐、缓解压力、规律睡眠）后，发作频率通常会明显减少。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-green"></div><div><strong>偏头痛：</strong>部分女性在更年期后偏头痛会自然减轻或消失；通过规律管理（避开诱因、必要时用预防性药物），大多数人可以把发作频率控制在可接受的范围内。</div></div>
+
+      <div class="sec-title">需要长期管理的情况</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>慢性偏头痛（每月发作超过 15 天）：</strong>需要在医生指导下长期用预防性药物，不能自行停药，定期复查调整方案。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>高血压引起的头痛：</strong>需要长期控制血压，血压稳定后头痛可以消失，但停药后血压反弹头痛会复发。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>药物过度使用性头痛：</strong>需要在医生指导下逐步减少止痛药用量，戒断过程中头痛可能暂时加重，但坚持下去后会明显好转。</div></div>
+
+      <div class="sec-title">长期不处理的风险</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-warn"></div><div>频繁头痛长期不处理，可能从偶发性发展为慢性头痛（每月超过 15 天），治疗难度会增加。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-warn"></div><div>长期依赖止痛药会引起药物过度使用性头痛，形成恶性循环。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-warn"></div><div>高血压引起的头痛如果忽视，血压持续升高会增加脑卒中风险。</div></div>
+    </div>
+
+    <!-- ══ 6. 日常 ══ -->
+    <div class="panel" id="panel-6">
+
+      <div class="sec-title" style="margin-top:0;">能减少头痛发作的日常习惯</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>保持规律作息，每天在相近的时间睡觉和起床，周末也尽量不要睡太晚——睡眠不规律是偏头痛最常见的诱因之一。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>每天喝够水，成年人每天至少 1500～2000 毫升，天热或运动后要更多。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>每工作 45～60 分钟，起来活动颈肩 5 分钟，避免长时间保持同一姿势。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div>记录头痛日记，找出自己的诱因（特定食物、压力、天气变化、月经周期），主动规避。</div></div>
+
+      <div class="sec-title">会加重头痛的行为</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-warn"></div><div><strong>熬夜和睡眠不规律：</strong>对偏头痛患者影响尤其明显，睡太少或睡太多都可能诱发。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-warn"></div><div><strong>过量咖啡因：</strong>每天喝咖啡超过 3 杯，或突然停止喝咖啡，都可能引发头痛。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-warn"></div><div><strong>饮酒：</strong>红酒、啤酒是偏头痛的常见诱因，发作频繁时建议减少或避免饮酒。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-warn"></div><div><strong>长时间强光和噪音环境：</strong>偏头痛发作期间尤其需要避免。</div></div>
+
+      <div class="sec-title">饮食建议</div>
+      <div class="pl-item"><div class="pl-dot pl-dot-green"></div><div><strong>规律进食：</strong>不要长时间不吃东西，血糖波动会诱发头痛，每餐间隔不超过 5～6 小时。</div></div>
+      <div class="pl-item"><div class="pl-dot pl-dot-accent"></div><div><strong>偏头痛常见食物诱因：</strong>陈年奶酪、腌制食品、味精、巧克力、红酒——如果发现吃某种食物后容易头痛，可以先避开试试。</div></div>
+      <div class="pl-item"><div class="pl-dot"></div><div><strong>镁和维生素 B2：</strong>有研究显示补充镁和维生素 B2 对减少偏头痛发作有一定帮助，但效果因人而异，建议在医生指导下使用。</div></div>
+
+      <div class="sec-title">什么时候需要复查</div>
+      <div class="body-p">如果已经在接受治疗，建议每 1～3 个月复查一次，让医生评估头痛频率是否有改善。如果头痛突然加重、发作规律改变，或出现新的伴随症状，随时去看医生，不要等到下次预约。</div>
+    </div>
+
+    <!-- 参考文献 -->
+    <div class="refs-panel">
+      <div class="refs-label">参考文献</div>
+      <div class="ref-item">[1] 中华医学会神经病学分会头痛协作组. 中国偏头痛诊治指南（2022年版）. 中华神经科杂志, 2022.</div>
+      <div class="ref-item">[2] 中华医学会神经病学分会. 紧张型头痛诊疗中国专家共识（2021）. 中华神经科杂志, 2021.</div>
+      <div class="ref-item">[3] Headache Classification Committee of the International Headache Society. The International Classification of Headache Disorders, 3rd edition. Cephalalgia, 2018.</div>
+      <div class="refs-more" id="refs-more">
+        <div class="ref-item">[4] Diener HC, et al. Pharmacological, interventional and neuromodulatory therapies for chronic migraine. Lancet Neurol, 2022.</div>
+        <div class="ref-item">[5] 王拥军, 等. 中国脑血管病临床管理指南. 中华神经科杂志, 2019.</div>
+        <div class="ref-item">[6] Marmura MJ, et al. The Acute Treatment of Migraine in Adults: The American Headache Society Evidence Assessment of Migraine Pharmacotherapies. Headache, 2015.</div>
+      </div>
+      <span class="refs-toggle" id="refs-toggle" onclick="toggleRefs()">展开全部</span>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const tabs    = document.querySelectorAll('.tab');
+const content = document.getElementById('content');
+const panels  = document.querySelectorAll('.panel');
+const tabsEl  = document.getElementById('tabs');
+
+let isClickScrolling = false;
+let clickScrollTimer = null;
+
+tabs.forEach((tab, idx) => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+
+    const target = panels[idx];
+    if (target) {
+      isClickScrolling = true;
+      clearTimeout(clickScrollTimer);
+      clickScrollTimer = setTimeout(() => { isClickScrolling = false; }, 800);
+
+      // .content 从 tabs 底部开始，offsetTop 已是纯内容偏移，直接使用
+        content.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+    }
+  });
+});
+
+content.addEventListener('scroll', () => {
+  if (isClickScrolling) return;
+
+  const scrollTop  = content.scrollTop;
+  const tabsHeight = tabsEl.offsetHeight;
+  const THRESHOLD  = tabsHeight + 16;
+
+  let active = 0;
+  panels.forEach((p, i) => {
+    if (p.offsetTop - THRESHOLD <= scrollTop) active = i;
+  });
+
+  tabs.forEach((t, i) => t.classList.toggle('active', i === active));
+  const activeTab = tabs[active];
+  if (activeTab) activeTab.scrollIntoView({ block: 'nearest', inline: 'center' });
+});
+
+// 参考文献折叠
+function toggleRefs() {
+  const m = document.getElementById('refs-more');
+  const t = document.getElementById('refs-toggle');
+  t.textContent = m.classList.toggle('open') ? '收起' : '展开全部';
+}
+</script>
+</body>
+</html>
