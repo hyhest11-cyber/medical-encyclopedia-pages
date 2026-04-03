@@ -320,7 +320,7 @@ async function loadFiles(path) {
 function renderFileList() {
   const listEl = document.getElementById('fileList');
   const folders = currentItems.filter(i => i.type === 'dir').sort((a,b) => a.name.localeCompare(b.name, 'zh'));
-  const files = currentItems.filter(i => i.type === 'file' && i.name.endsWith('.html')).sort((a,b) => a.name.localeCompare(b.name, 'zh'));
+  const files = currentItems.filter(i => i.type === 'file' && i.name.endsWith('.html') && !(currentPath === '' && i.name === 'index.html')).sort((a,b) => a.name.localeCompare(b.name, 'zh'));
 
   if (folders.length === 0 && files.length === 0) {
     listEl.innerHTML = `<div class="empty-state">
@@ -378,7 +378,7 @@ function renderFileList() {
 
 function updateStats() {
   const folders = currentItems.filter(i => i.type === 'dir').length;
-  const files = currentItems.filter(i => i.type === 'file' && i.name.endsWith('.html')).length;
+  const files = currentItems.filter(i => i.type === 'file' && i.name.endsWith('.html') && !(currentPath === '' && i.name === 'index.html')).length;
   document.getElementById('statFolders').textContent = folders;
   document.getElementById('statFiles').textContent = files;
   document.getElementById('statBase').textContent = PAGES_BASE;
@@ -425,8 +425,16 @@ async function createFolder() {
   const placeholderPath = `${folderPath}/.gitkeep`;
 
   try {
-    const content = btoa('');
-    await apiPut(placeholderPath, content);
+    const fileContent = btoa('');
+    let existingSha = null;
+    try {
+      const checkResp = await fetch(`${API_BASE}/${encodeURIComponent(placeholderPath)}`, { headers: getHeaders() });
+      if (checkResp.ok) {
+        const checkData = await checkResp.json();
+        existingSha = checkData.sha;
+      }
+    } catch (_) {}
+    await apiPut(placeholderPath, fileContent, existingSha);
     closeModal('newFolderModal');
     showToast(`文件夹「${name}」创建成功`, 'success');
     await loadFiles(currentPath);
