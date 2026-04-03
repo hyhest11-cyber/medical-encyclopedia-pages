@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>甲沟炎</title>
+  <style>
+    :root {
+      --theme:  #E0F7F5;
+      --accent: #26A69A;
+      --grad:   linear-gradient(160deg, #E0F7F5 0%, #F0FFFE 60%, #ffffff 100%);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+    }
+    .app {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background: #fff;
+      position: relative;
+    }
+
+    /* ── 关闭按钮 ── */
+    .btn-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 20px;
+      color: #999;
+      line-height: 1;
+      padding: 0;
+      z-index: 200;
+    }
+    .btn-close:active { color: #555; }
+
+    /* ── Header ── */
+    .header {
+      background: var(--grad);
+      padding: 14px 16px 16px;
+      flex-shrink: 0;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      padding-right: 32px;
+    }
+    .header-brand {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--accent);
+      opacity: 0.75;
+    }
+    .header-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+    .header-meta {
+      font-size: 13px;
+      color: #1a1a1a;
+      line-height: 1.6;
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      flex-shrink: 0;
+      display: flex;
+      overflow-x: auto;
+      background: #fff;
+      border-bottom: 1px solid #eee;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      flex-shrink: 0;
+      padding: 0 16px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      color: #888;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: color .2s;
+    }
+    .tab.active {
+      color: var(--accent);
+      font-weight: 700;
+      border-bottom-color: var(--accent);
+    }
+
+    /* ── Content ── */
+    .content {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      overflow-y: scroll;
+      -webkit-overflow-scrolling: touch;
+    }
+    .panel {
+      padding: 20px 16px 40px;
+      background: #fff;
+    }
+    .panel + .panel {
+      border-top: 8px solid #f5f5f5;
+    }
+
+    /* ── 版块标题 ── */
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 20px;
+    }
+    .panel-title::before {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 22px;
+      border-radius: 2px;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* ── 小节标题 ── */
+    .section-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin: 24px 0 12px;
+    }
+    .section-title:first-child { margin-top: 0; }
+
+    /* ── 正文 ── */
+    .body-text {
+      font-size: 15px;
+      line-height: 1.8;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    /* ── 概述速览列表 ── */
+    .ov-list {
+      margin-bottom: 16px;
+    }
+    .ov-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #333;
+    }
+    .ov-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      margin-top: 6px;
+    }
+    .ov-label {
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    /* ── 小圆点列表 ── */
+    .list-item {
+      display: flex;
+      gap: 10px;
+      font-size: 15px;
+      line-height: 1.75;
+      color: #333;
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+    .list-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #333;
+      flex-shrink: 0;
+      margin-top: 9px;
+    }
+
+    /* ── 带小标题的列表项 ── */
+    .pl-item-titled {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      align-items: flex-start;
+    }
+    .pl-item-titled:last-child { margin-bottom: 0; }
+    .pl-item-titled .list-dot { margin-top: 9px; flex-shrink: 0; }
+    .pl-item-titled-body { flex: 1; }
+    .pl-item-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a1a1a;
+      line-height: 1.5;
+      margin-bottom: 3px;
+    }
+    .pl-item-desc {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.7;
+    }
+
+    /* ── 就医检查表格 ── */
+    .check-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+    .check-table th {
+      background: #f5f5f5;
+      color: #555;
+      font-weight: 600;
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    .check-table td {
+      padding: 10px 10px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #333;
+      line-height: 1.6;
+      vertical-align: top;
+    }
+    .check-table tr:last-child td { border-bottom: none; }
+
+    /* ── 插图占位 ── */
+    .illus-placeholder {
+      width: 100%;
+      height: 160px;
+      background: #f0fffe;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #aaa;
+      font-size: 13px;
+      margin: 16px 0;
+    }
+
+    /* ── 参考文献 ── */
+    .refs-divider {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 24px 0 16px;
+    }
+    .refs-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #888;
+      margin-bottom: 8px;
+    }
+    .refs-list {
+      font-size: 12px;
+      color: #aaa;
+      line-height: 1.7;
+    }
+    .refs-list p { margin-bottom: 4px; }
+    .refs-toggle {
+      font-size: 12px;
+      color: var(--accent);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 0;
+      margin-top: 4px;
+    }
+    .refs-hidden { display: none; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 关闭按钮 -->
+  <button class="btn-close" onclick="window.parent.postMessage({ action: 'close' }, '*')">×</button>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-top">
+      <span class="header-brand">美团买药·互联网医院</span>
+    </div>
+    <div class="header-title">甲沟炎</div>
+    <div class="header-meta">别称：嵌甲感染、甲周炎</div>
+    <div class="header-meta">就诊科室：皮肤科</div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs" id="tabs">
+    <div class="tab active">概述</div>
+    <div class="tab">病因</div>
+    <div class="tab">症状</div>
+    <div class="tab">就医</div>
+    <div class="tab">治疗</div>
+    <div class="tab">预后</div>
+    <div class="tab">日常</div>
+  </div>
+
+  <!-- Content -->
+  <div class="content" id="content">
+
+    <!-- 概述 -->
+    <div class="panel" id="panel-0">
+      <div class="ov-list">
+        <div class="ov-item">
+          <div class="ov-dot"></div>
+          <span class="ov-label">定义：</span>
+          <span>指甲两侧皮肤（甲沟）发生的细菌或真菌感染，常见于大脚趾。</span>
+        </div>
+        <div class="ov-item">
+          <div class="ov-dot"></div>
+          <span class="ov-label">症状：</span>
+          <span>常表现为甲沟处红肿、疼痛，严重时化脓流液。</span>
+        </div>
+        <div class="ov-item">
+          <div class="ov-dot"></div>
+          <span class="ov-label">病因：</span>
+          <span>多由细菌感染引起，嵌甲（指甲嵌入皮肤）是最常见的诱因。</span>
+        </div>
+        <div class="ov-item">
+          <div class="ov-dot"></div>
+          <span class="ov-label">治疗：</span>
+          <span>轻度用抗生素药膏，化脓时需切开引流，嵌甲反复发作需手术矫正。</span>
+        </div>
+      </div>
+
+      <!-- 插图占位 -->
+      <div class="illus-placeholder">
+        <!-- Gemini Prompt (类型A):
+          A medical illustration for a Chinese health encyclopedia article about paronychia (甲沟炎).
+          Style: Flat design medical illustration, similar to Baidu Health Encyclopedia style. Clean, professional, soft colors. Suitable for mobile reading. No text labels in the image.
+          Content: A close-up of a human foot (big toe area), showing the nail groove area with subtle redness and swelling around the nail edge. The illustration should look calm and informative, not graphic or distressing.
+          Color palette: Soft greens (#E0F7F5 range), warm skin tones, light background (#f5f5f5 or white).
+          Do NOT include: text, labels, arrows, charts, or any written content. Pure illustration only.
+          Aspect ratio: 16:9, horizontal layout.
+        -->
+        插图加载中
+      </div>
+
+      <p class="body-text">甲沟炎是指甲两侧或根部的皮肤（也就是甲沟）发生了感染，最常见于大脚趾。当指甲边缘刺破或压迫旁边的皮肤时，细菌就容易趁机进入，引发红肿和疼痛。手指也可能发生甲沟炎，尤其是经常接触水或做美甲的人。</p>
+      <p class="body-text">甲沟炎分为急性和慢性两种。急性甲沟炎通常由细菌感染引起，起病快、症状明显；慢性甲沟炎多与真菌感染或长期接触水有关，症状较轻但反复发作。</p>
+    </div>
+
+    <!-- 病因 -->
+    <div class="panel" id="panel-1">
+      <h2 class="panel-title">病因</h2>
+      <p class="body-text">甲沟炎最根本的原因是皮肤屏障被破坏后，细菌或真菌趁机进入甲沟引发感染。最常见的触发因素是嵌甲——指甲边缘嵌入旁边的皮肤，造成皮肤破损，细菌就从这个缺口进入。</p>
+
+      <div class="section-title">主要病因</div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">嵌甲（指甲嵌入皮肤）</div>
+          <div class="pl-item-desc">剪指甲时剪得太短、两侧剪成弧形，或穿鞋太紧，都会让指甲边缘嵌入旁边的皮肤，造成皮肤破损，细菌从破损处进入引发感染。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">外伤或皮肤破损</div>
+          <div class="pl-item-desc">撕倒刺、咬指甲、修甲时划伤皮肤，或手指被刺伤、夹伤，都会让细菌有机会进入甲沟。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">长期接触水或化学品</div>
+          <div class="pl-item-desc">长时间泡水会让甲沟皮肤变软、屏障变弱，真菌和细菌更容易侵入。洗碗工、护士、美发师等职业人群更容易发生慢性甲沟炎。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">美甲操作不当</div>
+          <div class="pl-item-desc">过度修剪甲小皮（指甲根部的薄皮）、使用劣质美甲产品，会破坏甲沟的天然保护屏障，增加感染风险。</div>
+        </div>
+      </div>
+
+      <div class="section-title">哪些人更容易得甲沟炎</div>
+      <div class="list-item"><div class="list-dot"></div><div>有嵌甲习惯或经常剪指甲剪太短的人</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>穿鞋头窄、鞋子太紧的人，脚趾长期受压</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>糖尿病患者，血液循环差、皮肤愈合慢，感染后更难好</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>免疫力低下的人，如长期服用激素或免疫抑制药物的人</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>经常做美甲、频繁接触水或清洁剂的人</div></div>
+    </div>
+
+    <!-- 症状 -->
+    <div class="panel" id="panel-2">
+      <h2 class="panel-title">症状</h2>
+      <p class="body-text">甲沟炎的症状从轻到重依次发展，早期只是轻微红肿，严重时会化脓、甲沟皮肤隆起，甚至影响走路。</p>
+
+      <div class="section-title">常见表现</div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">红肿和疼痛</div>
+          <div class="pl-item-desc">甲沟（指甲两侧或根部）皮肤发红、肿胀，按压时明显疼痛，穿鞋或走路时疼痛加重。这是最早出现的症状。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">化脓</div>
+          <div class="pl-item-desc">感染加重后，甲沟处会积聚脓液，皮肤下方可以看到黄白色的脓包，有时会自行破溃流出脓液。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">甲沟皮肤增生</div>
+          <div class="pl-item-desc">慢性甲沟炎或反复发作的甲沟炎，甲沟旁边的皮肤会逐渐增厚、隆起，形成肉芽组织，看起来像一块多余的肉长出来。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">指甲变形</div>
+          <div class="pl-item-desc">长期慢性感染可能导致指甲变厚、变色（发黄或发黑）、甲面不平整，严重时指甲与甲床分离。</div>
+        </div>
+      </div>
+
+      <div class="section-title">出现这些情况要尽快去看医生</div>
+      <div class="list-item"><div class="list-dot"></div><div>红肿范围扩散到整个脚趾或手指，甚至蔓延到手背/脚背</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>出现发烧（体温超过 38°C）</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>脓液很多、自行处理后没有好转，或反复化脓</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>有糖尿病或免疫力低下，甲沟出现任何感染迹象都应尽快就医</div></div>
+    </div>
+
+    <!-- 就医 -->
+    <div class="panel" id="panel-3">
+      <h2 class="panel-title">就医</h2>
+
+      <div class="section-title">去哪个科</div>
+      <p class="body-text">皮肤科是首选。如果当地皮肤科不方便，也可以去外科或全科门诊。脚趾甲沟炎有时也会在骨科或足踝外科就诊。</p>
+
+      <div class="section-title">什么时候需要去看医生</div>
+      <div class="list-item"><div class="list-dot"></div><div>红肿疼痛超过 2–3 天没有好转，或症状越来越重</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>甲沟处出现脓液，自己无法处理</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>嵌甲反复发作，每次好了又犯</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>有糖尿病或免疫力低下，出现任何甲沟红肿都建议就医</div></div>
+
+      <div class="section-title">去看医生前可以准备什么</div>
+      <p class="body-text">记录一下症状开始的时间、是否有外伤或修甲经历、之前有没有类似情况、用过什么药。如果有糖尿病或其他基础病，告诉医生。</p>
+
+      <div class="section-title">医生通常会做哪些检查</div>
+      <table class="check-table">
+        <tr>
+          <th>检查项目</th>
+          <th>用来看什么</th>
+        </tr>
+        <tr>
+          <td>视诊和触诊</td>
+          <td>直接观察甲沟红肿范围、是否有脓液、嵌甲程度，多数情况下看一眼就能诊断</td>
+        </tr>
+        <tr>
+          <td>脓液培养</td>
+          <td>取少量脓液化验，判断是哪种细菌感染，帮助选择合适的抗生素</td>
+        </tr>
+        <tr>
+          <td>真菌检查</td>
+          <td>慢性甲沟炎或指甲变色时，排查是否合并真菌感染（灰指甲）</td>
+        </tr>
+        <tr>
+          <td>血糖检测</td>
+          <td>首次就诊或感染反复发作时，排查是否有糖尿病</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- 治疗 -->
+    <div class="panel" id="panel-4">
+      <h2 class="panel-title">治疗</h2>
+
+      <div class="section-title">治疗思路</div>
+      <p class="body-text">甲沟炎的治疗根据严重程度分阶段处理：轻度以局部用药为主，化脓后需要切开排脓，嵌甲反复发作则需要手术解决根本问题。</p>
+
+      <div class="section-title">主要治疗方式</div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">局部抗生素药膏（轻度首选）</div>
+          <div class="pl-item-desc">红肿但还没化脓时，医生会开含抗生素的外用药膏（如莫匹罗星软膏），每天涂抹患处，通常 3–5 天可以明显好转。同时用温盐水泡脚可以帮助消肿。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">口服抗生素（感染较重时）</div>
+          <div class="pl-item-desc">红肿范围较大、有发烧或外用药效果不好时，医生会开口服抗生素，通常需要服用 5–7 天。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">切开引流（已化脓时）</div>
+          <div class="pl-item-desc">甲沟已经积脓时，医生会在局部麻醉下用小刀切开脓包，让脓液流出，之后换药处理。这个操作很快，通常当天就能完成。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">嵌甲矫正手术（反复发作时）</div>
+          <div class="pl-item-desc">如果甲沟炎是由嵌甲引起且反复发作，医生会建议做嵌甲矫正手术——切除嵌入皮肤的那部分指甲边缘，并处理甲床，防止指甲再次嵌入。手术在局部麻醉下进行，恢复期约 2–4 周。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">抗真菌治疗（慢性甲沟炎）</div>
+          <div class="pl-item-desc">慢性甲沟炎合并真菌感染时，需要使用抗真菌药膏或口服抗真菌药，疗程通常较长（数周到数月）。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 预后 -->
+    <div class="panel" id="panel-5">
+      <h2 class="panel-title">预后</h2>
+      <p class="body-text">急性甲沟炎如果及时处理，预后很好。轻度感染用药后通常一周内就能好转；化脓后切开引流，大多数人两周内可以愈合。</p>
+      <p class="body-text">慢性甲沟炎或嵌甲引起的甲沟炎容易反复发作，单靠药物治疗效果有限，做嵌甲矫正手术后复发率会明显降低。</p>
+
+      <div class="section-title">影响恢复的因素</div>
+      <div class="list-item"><div class="list-dot"></div><div>是否及时就医：拖延处理会让感染扩散，增加治疗难度</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>是否有嵌甲：嵌甲不解决，甲沟炎会反复发作</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>是否有糖尿病：血糖控制不好会让伤口愈合变慢，感染更难控制</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>日常护理是否到位：保持患处干燥、按时换药对恢复很重要</div></div>
+
+      <div class="section-title">可能出现的并发症</div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">感染扩散（蜂窝织炎）</div>
+          <div class="pl-item-desc">感染从甲沟蔓延到整个手指或脚趾的皮下组织，出现大范围红肿热痛，需要静脉注射抗生素治疗。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">指甲永久变形</div>
+          <div class="pl-item-desc">长期慢性感染或反复手术可能导致指甲生长异常，甲面变厚、变色或不平整。</div>
+        </div>
+      </div>
+      <div class="pl-item-titled">
+        <div class="list-dot"></div>
+        <div class="pl-item-titled-body">
+          <div class="pl-item-title">骨髓炎（罕见）</div>
+          <div class="pl-item-desc">感染极少数情况下会深入到骨头，糖尿病患者风险更高，需要长期抗生素治疗甚至手术。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 日常 -->
+    <div class="panel" id="panel-6">
+      <h2 class="panel-title">日常</h2>
+
+      <div class="section-title">日常注意事项</div>
+      <div class="list-item"><div class="list-dot"></div><div>剪指甲时留一点点白边，不要剪太短，两侧剪平（不要剪成弧形），这是预防嵌甲最有效的方法</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>穿鞋选鞋头宽松的，避免脚趾长期受压</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>治疗期间保持患处干燥，洗澡后及时擦干，避免长时间泡水</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>不要自己用针挑脓或强行剪掉嵌入的指甲，容易加重感染</div></div>
+      <div class="list-item"><div class="list-dot"></div><div>做美甲时告知美甲师不要过度修剪甲小皮（指甲根部的薄皮）</div></div>
+
+      <div class="section-title">吃什么、不吃什么</div>
+      <p class="body-text">甲沟炎没有特别严格的饮食禁忌。感染期间可以适当多吃富含蛋白质的食物（鸡蛋、鱼、豆腐等），有助于伤口愈合。辛辣刺激的食物可能加重局部充血，感染期间适量少吃。</p>
+
+      <div class="section-title">运动</div>
+      <p class="body-text">脚趾甲沟炎急性期建议减少走路和站立时间，避免穿紧鞋运动。症状好转后可以逐渐恢复正常活动，但跑步、球类等对脚趾有压迫的运动建议等完全愈合后再进行。</p>
+
+      <div class="section-title">什么时候需要复查</div>
+      <p class="body-text">切开引流后通常需要每 1–2 天换药一次，直到伤口愈合。做嵌甲矫正手术后，医生会安排术后 1 周和 2–4 周复查。如果用药后 3–5 天症状没有好转，或者出现红肿扩散、发烧，应提前复诊。</p>
+
+      <!-- 参考文献 -->
+      <hr class="refs-divider">
+      <div class="refs-title">参考文献</div>
+      <div class="refs-list">
+        <p>[1] Rigopoulos D, et al. Acute and chronic paronychia. Am Fam Physician. 2008;77(3):339-346.</p>
+        <p>[2] Rockwell PG. Acute and chronic paronychia. Am Fam Physician. 2001;63(6):1113-1116.</p>
+        <p id="refs-more" class="refs-hidden">
+          [3] Shafritz AB, Coppage JM. Acute and chronic paronychia of the hand. J Am Acad Orthop Surg. 2014;22(3):165-174.<br>
+          [4] 中国临床皮肤病学（第2版）. 赵辨主编. 江苏科学技术出版社. 2017.
+        </p>
+        <button class="refs-toggle" id="refs-btn" onclick="toggleRefs()">展开全部</button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<script>
+  /* ── 参考文献折叠 ── */
+  function toggleRefs() {
+    const more = document.getElementById('refs-more');
+    const btn  = document.getElementById('refs-btn');
+    if (more.classList.contains('refs-hidden')) {
+      more.classList.remove('refs-hidden');
+      btn.textContent = '收起内容';
+    } else {
+      more.classList.add('refs-hidden');
+      btn.textContent = '展开全部';
+    }
+  }
+
+  /* ── Tab 交互 ── */
+  const tabs    = document.querySelectorAll('.tab');
+  const content = document.getElementById('content');
+  const panels  = document.querySelectorAll('.panel');
+  const tabsEl  = document.getElementById('tabs');
+
+  let isClickScrolling = false;
+  let clickScrollTimer = null;
+
+  /* 点击 Tab：立即高亮 + 精准跳转 */
+  tabs.forEach((tab, idx) => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      const target = panels[idx];
+      if (target) {
+        isClickScrolling = true;
+        clearTimeout(clickScrollTimer);
+        clickScrollTimer = setTimeout(() => { isClickScrolling = false; }, 800);
+        content.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+      }
+    });
+  });
+
+  /* 手动滑动：根据 scrollTop 判断当前版块并高亮 */
+  content.addEventListener('scroll', () => {
+    if (isClickScrolling) return;
+
+    const scrollTop  = content.scrollTop;
+    const tabsHeight = tabsEl.offsetHeight;
+    const THRESHOLD  = tabsHeight + 16;
+
+    let active = 0;
+    panels.forEach((p, i) => {
+      if (p.offsetTop - THRESHOLD <= scrollTop) active = i;
+    });
+
+    tabs.forEach((t, i) => t.classList.toggle('active', i === active));
+
+    const activeTab = tabs[active];
+    if (activeTab) activeTab.scrollIntoView({ block: 'nearest', inline: 'center' });
+  });
+</script>
+</body>
+</html>
