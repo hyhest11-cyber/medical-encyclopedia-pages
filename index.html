@@ -219,6 +219,19 @@
 </div>
 
 <!-- 删除确认模态框 -->
+<div class="modal-overlay hidden" id="moveFolderModal">
+  <div class="modal">
+    <h3>📦 移动文件夹</h3>
+    <label>目标路径（留空表示移到根目录）</label>
+    <input type="text" id="moveFolderTarget" placeholder="例如：名词百科 或 名词百科/检查" />
+    <div class="modal-hint" id="moveFolderHint"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('moveFolderModal')">取消</button>
+      <button class="btn btn-primary" onclick="moveFolder()">移动</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay hidden" id="deleteModal">
   <div class="modal">
     <h3>🗑️ 确认删除</h3>
@@ -352,6 +365,7 @@ function renderFileList() {
       </div>
       <div class="file-name folder-name" onclick="loadFiles('${item.path}')">${item.name}</div>
       <div class="file-actions">
+        <button class="btn btn-outline btn-sm" onclick="showMoveFolderModal('${item.path}', '${item.name}')">移动</button>
         <button class="btn btn-danger btn-sm" onclick="showDeleteFolderModal('${item.path}', '${item.name}')">删除</button>
       </div>
     </div>`;
@@ -526,6 +540,110 @@ function showDeleteModal(path, name, sha) {
   document.getElementById('deleteModal').classList.remove('hidden');
 }
 
+function showMoveFolderModal(path, name) {
+  window._moveFolderPath = path;
+  window._moveFolderName = name;
+  document.getElementById('moveFolderTarget').value = '';
+  document.getElementById('moveFolderHint').textContent = `将移动文件夹「${name}」及其所有内容`;
+  document.getElementById('moveFolderModal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('moveFolderTarget').focus(), 100);
+}
+
+async function moveFolder() {
+  const token = getToken();
+  if (!token) { showToast('请先配置 GitHub Token', 'error'); return; }
+
+  const srcPath = window._moveFolderPath;
+  const folderName = window._moveFolderName;
+  const targetInput = document.getElementById('moveFolderTarget').value.trim();
+  const destPath = targetInput ? `${targetInput}/${folderName}` : folderName;
+
+  if (destPath === srcPath) { showToast('目标路径与当前路径相同', 'error'); return; }
+
+  closeModal('moveFolderModal');
+  showToast('移动中，请稍候...', 'info');
+
+  try {
+    // 1. 获取该文件夹下所有文件
+    const treeResp = await fetch(
+      `https://api.github.com/repos/${OWNER}/${REPO}/git/trees/main?recursive=1`,
+      { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } }
+    );
+    const treeData = await treeResp.json();
+    const filesToMove = treeData.tree.filter(f => f.type === 'blob' && f.path.startsWith(srcPath + '/'));
+
+    if (filesToMove.length === 0) {
+      showToast('该文件夹为空，无需移动', 'info');
+      return;
+    }
+
+    // 2. 逐个复制到新路径
+    for (const file of filesToMove) {
+      const relativePath = file.path.slice(srcPath.length + 1);
+      const newFilePath = `${destPath}/${relativePath}`;
+
+      // 获取文件内容
+      const encodedOld = file.path.split('/').map(encodeURIComponent).join('/');
+      const fileResp = await fetch(
+        `https://api.github.com/repos/${OWNER}/${REPO}/contents/${encodedOld}`,
+        { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } }
+      );
+      const fileData = await fileResp.json();
+      const fileContent = fileData.content.replace(/\n/g, '');
+
+      // 检查目标是否已存在
+      const encodedNew = newFilePath.split('/').map(encodeURIComponent).join('/');
+      let newSha = null;
+      const checkResp = await fetch(
+        `https://api.github.com/repos/${OWNER}/${REPO}/contents/${encodedNew}`,
+        { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } }
+      );
+      if (checkResp.ok) {
+        const checkData = await checkResp.json();
+        newSha = checkData.sha;
+      }
+
+      // 创建新文件
+      const putBody = { message: `Move ${file.path} to ${newFilePath}`, content: fileContent };
+      if (newSha) putBody.sha = newSha;
+      await fetch(
+        `https://api.github.com/repos/${OWNER}/${REPO}/contents/${encodedNew}`,
+        {
+          method: 'PUT',
+          headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+          body: JSON.stringify(putBody)
+        }
+      );
+    }
+
+    // 3. 删除旧路径文件
+    // 重新获取最新 tree
+    const treeResp2 = await fetch(
+      `https://api.github.com/repos/${OWNER}/${REPO}/git/trees/main?recursive=1`,
+      { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } }
+    );
+    const treeData2 = await treeResp2.json();
+    const oldFiles = treeData2.tree.filter(f => f.type === 'blob' && f.path.startsWith(srcPath + '/'));
+
+    for (const file of oldFiles) {
+      const encodedOld = file.path.split('/').map(encodeURIComponent).join('/');
+      await fetch(
+        `https://api.github.com/repos/${OWNER}/${REPO}/contents/${encodedOld}`,
+        {
+          method: 'DELETE',
+          headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+          body: JSON.stringify({ message: `Remove ${file.path} (moved)`, sha: file.sha })
+        }
+      );
+    }
+
+    showToast(`文件夹「${folderName}」已移动到「${targetInput || '根目录'}」`, 'success');
+    await loadFiles(currentPath);
+  } catch (e) {
+    showToast(`移动失败：${e.message}`, 'error');
+  }
+}
+
 function showDeleteFolderModal(path, name) {
   deleteTarget = { path, name, type: 'folder' };
   document.getElementById('deleteFileName').textContent = `文件夹「${name}」及其所有内容`;
@@ -607,7 +725,7 @@ function showToast(msg, type = 'info') {
 // 回车键支持
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    ['newFolderModal','uploadModal','deleteModal'].forEach(id => {
+    ['newFolderModal','uploadModal','deleteModal','moveFolderModal'].forEach(id => {
       document.getElementById(id).classList.add('hidden');
     });
   }
