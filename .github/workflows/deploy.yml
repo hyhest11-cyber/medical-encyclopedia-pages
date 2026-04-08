@@ -1,0 +1,67 @@
+name: Deploy to Netlify
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Deploy to Netlify via zip
+        env:
+          NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
+          SITE_ID: 15374ba2-73db-46a0-94fb-51eb6022f002
+        run: |
+          python - <<'EOF'
+          import os, zipfile, requests, time
+
+          token = os.environ["NETLIFY_TOKEN"]
+          site_id = os.environ["SITE_ID"]
+
+          # 打包所有文件（排除 .gitkeep 和 README.md）
+          zip_path = "/tmp/deploy.zip"
+          with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+              for root, dirs, files in os.walk("."):
+                  # 排除 .git 目录
+                  dirs[:] = [d for d in dirs if d != ".git" and d != ".github"]
+                  for fname in files:
+                      if fname in (".gitkeep", "README.md", "deploy.yml"):
+                          continue
+                      full = os.path.join(root, fname)
+                      arcname = os.path.relpath(full, ".")
+                      zf.write(full, arcname)
+                      print(f"  Added: {arcname}")
+
+          # 上传到 Netlify
+          with open(zip_path, "rb") as f:
+              resp = requests.post(
+                  f"https://api.netlify.com/api/v1/sites/{site_id}/deploys",
+                  headers={"Authorization": f"Bearer {token}", "Content-Type": "application/zip"},
+                  data=f
+              )
+          result = resp.json()
+          deploy_id = result.get("id")
+          print(f"Deploy ID: {deploy_id}, state: {result.get('state')}")
+
+          # 等待部署完成
+          for i in range(20):
+              time.sleep(5)
+              check = requests.get(
+                  f"https://api.netlify.com/api/v1/deploys/{deploy_id}",
+                  headers={"Authorization": f"Bearer {token}"}
+              ).json()
+              state = check.get("state")
+              print(f"  [{i+1}] state: {state}")
+              if state == "ready":
+                  print("Deploy success!")
+                  break
+              elif state == "error":
+                  print(f"Deploy error: {check.get('error_message')}")
+                  exit(1)
+          EOF
