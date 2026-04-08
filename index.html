@@ -127,12 +127,15 @@
 
 <div class="container">
 
-  <!-- Token 配置 -->
+    <!-- Token 配置 -->
   <div class="config-bar" id="configBar">
-    <label>⚙️ GitHub Token（用于上传/删除操作）：</label>
-    <input type="password" id="tokenInput" placeholder="输入 GitHub Personal Access Token..." />
+    <label>⚙️ GitHub Token：</label>
+    <input type="password" id="tokenInput" placeholder="GitHub Personal Access Token..." />
     <button class="btn btn-warning" onclick="saveToken()">保存</button>
     <button class="btn btn-outline" onclick="toggleTokenVisibility()">显示/隐藏</button>
+    <label style="margin-left:16px;">🚀 Netlify Token：</label>
+    <input type="password" id="nfTokenInput" placeholder="Netlify Personal Access Token..." style="width:260px;" />
+    <button class="btn btn-warning" onclick="saveNfToken()">保存</button>
   </div>
 
   <!-- 统计栏 -->
@@ -247,6 +250,7 @@
 const OWNER = 'hyhest11-cyber';
 const REPO = 'medical-encyclopedia-pages';
 const PAGES_BASE = 'https://med-encyclopedia-pages.netlify.app/';
+const NF_SITE_ID = '15374ba2-73db-46a0-94fb-51eb6022f002';
 const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
 
 let currentPath = '';
@@ -262,7 +266,16 @@ function saveToken() {
   const t = document.getElementById('tokenInput').value.trim();
   if (!t) { showToast('请输入 Token', 'error'); return; }
   localStorage.setItem('gh_token', t);
-  showToast('Token 已保存', 'success');
+  showToast('GitHub Token 已保存', 'success');
+}
+function getNfToken() {
+  return localStorage.getItem('nf_token') || '';
+}
+function saveNfToken() {
+  const t = document.getElementById('nfTokenInput').value.trim();
+  if (!t) { showToast('请输入 Netlify Token', 'error'); return; }
+  localStorage.setItem('nf_token', t);
+  showToast('Netlify Token 已保存', 'success');
 }
 function toggleTokenVisibility() {
   const inp = document.getElementById('tokenInput');
@@ -270,8 +283,93 @@ function toggleTokenVisibility() {
 }
 function initToken() {
   const saved = getToken();
-  if (saved) {
-    document.getElementById('tokenInput').value = saved;
+  if (saved) document.getElementById('tokenInput').value = saved;
+  const nfSaved = getNfToken();
+  if (nfSaved) document.getElementById('nfTokenInput').value = nfSaved;
+}
+
+// ===== Netlify 自动部署 =====
+async function deployToNetlify() {
+  const nfToken = getNfToken();
+  if (!nfToken) return; // 没配置 Token 则跳过
+  const ghToken = getToken();
+  if (!ghToken) return;
+
+  showToast('正在同步到 Netlify...', 'info');
+
+  try {
+    // 1. 获取 GitHub 文件树
+    const treeResp = await fetch(
+      `https://api.github.com/repos/${OWNER}/${REPO}/git/trees/main?recursive=1`,
+      { headers: { 'Authorization': `token ${ghToken}`, 'Accept': 'application/vnd.github.v3+json' } }
+    );
+    const treeData = await treeResp.json();
+    const files = treeData.tree.filter(f => f.type === 'blob' && !f.path.endsWith('.gitkeep') && f.path !== 'README.md');
+
+    // 2. 下载所有文件内容
+    const fileMap = {};
+    for (const f of files) {
+      const encoded = f.path.split('/').map(encodeURIComponent).join('/');
+      const r = await fetch(
+        `https://api.github.com/repos/${OWNER}/${REPO}/contents/${encoded}`,
+        { headers: { 'Authorization': `token ${ghToken}`, 'Accept': 'application/vnd.github.v3+json' } }
+      );
+      const data = await r.json();
+      // base64 decode to binary string
+      const binary = atob(data.content.replace(/\n/g, ''));
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      fileMap[f.path] = bytes;
+    }
+
+    // 3. 打包成 zip（使用 JSZip CDN）
+    if (typeof JSZip === 'undefined') {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+        s.onload = resolve; s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+    const zip = new JSZip();
+    for (const [path, bytes] of Object.entries(fileMap)) {
+      zip.file(path, bytes);
+    }
+    const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+
+    // 4. 上传到 Netlify（zip 直接部署，0 credits）
+    const deployResp = await fetch(
+      `https://api.netlify.com/api/v1/sites/${NF_SITE_ID}/deploys`,
+      {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${nfToken}`, 'Content-Type': 'application/zip' },
+        body: zipBlob
+      }
+    );
+    const deployData = await deployResp.json();
+    if (deployData.id) {
+      // 5. 轮询等待部署完成
+      for (let i = 0; i < 20; i++) {
+        await new Promise(r => setTimeout(r, 3000));
+        const check = await fetch(
+          `https://api.netlify.com/api/v1/deploys/${deployData.id}`,
+          { headers: { 'Authorization': `Bearer ${nfToken}` } }
+        ).then(r => r.json());
+        if (check.state === 'ready') {
+          showToast('✅ Netlify 已同步，链接立即可用！', 'success');
+          return;
+        }
+        if (check.state === 'error') {
+          showToast('Netlify 部署失败：' + (check.error_message || '未知错误'), 'error');
+          return;
+        }
+      }
+      showToast('Netlify 部署超时，请稍后刷新', 'info');
+    } else {
+      showToast('Netlify 部署失败：' + (deployData.error || JSON.stringify(deployData)), 'error');
+    }
+  } catch(e) {
+    showToast('Netlify 同步出错：' + e.message, 'error');
   }
 }
 
@@ -526,12 +624,15 @@ async function uploadFiles() {
     }
   }
 
-  btn.disabled = false;
+    btn.disabled = false;
   btn.textContent = '上传';
   closeModal('uploadModal');
   showToast(`上传完成：${ok} 成功${fail > 0 ? `，${fail} 失败` : ''}`, ok > 0 ? 'success' : 'error');
-  await new Promise(r => setTimeout(r, 1500));
-  await loadFiles(currentPath);
+  if (ok > 0) {
+    await new Promise(r => setTimeout(r, 1500));
+    await loadFiles(currentPath);
+    deployToNetlify();
+  }
 }
 
 // ===== 删除 =====
@@ -668,6 +769,7 @@ async function confirmDelete() {
     currentItems = currentItems.filter(i => i.path !== deleteTarget.path);
     renderFileList(currentItems);
     updateStats();
+    deployToNetlify();
   } catch(e) {
     showToast(`删除失败：${e.message}`, 'error');
   }
